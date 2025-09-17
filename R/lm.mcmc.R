@@ -70,8 +70,8 @@ lm.mcmc = function(y, X, model.prior = md.prior(1), burnin.iterations=1e4, mcmc.
   out$R2 = result$Rsq
   out$mse = result$residual_sd^2
   out$freq = result$mcmc_count
-  out$mcmc_id = result$mcmc_id
-  out$mcmc_draws = result$mcmc_draws
+  out$mcmc_id = result$mcmc_id+1
+  out$mcmc_draws = result$mcmc_draws+1
 
   return(out)
 }
