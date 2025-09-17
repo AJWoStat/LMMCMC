@@ -70,7 +70,7 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
 \examples{
 n = 100
 p = 5
-X = rnorm(n*p, n, p)
-y = rnorm(n) + 1 + X%*%c(1,1,0,0,0)
+X = matrix(rnorm(n*p), n, p)
+y = rnorm(n) + 1 + X\%*\%rep(c(1,0), times = c(2, p-2))
 out = lm.mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e3, mcmc.iterations=1e4, thin=1)
 }
