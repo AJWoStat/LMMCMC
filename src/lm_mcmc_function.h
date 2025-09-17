@@ -7,7 +7,6 @@
 #include <string.h>
 #include "R.h"
 #include "Rmath.h"
-#include "Rinterface.h"
 #include "Rinternals.h"
 #include "Rdefines.h"
 #include "data_store_struct/data_store_struct.h"
