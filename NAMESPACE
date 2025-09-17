@@ -1,0 +1,13 @@
+export(lm.mcmc)
+export(md.prior)
+export(custom.prior)
+importFrom(leaps, regsubsets)
+importFrom(BAS, uniform, Bernoulli, beta.binomial, tr.beta.binomial, tr.poisson, tr.power.prior)
+export(uniform)
+export(Bernoulli)
+export(beta.binomial)
+export(tr.beta.binomial)
+export(tr.poisson)
+export(tr.power.prior)
+useDynLib(LMMCMC)
+

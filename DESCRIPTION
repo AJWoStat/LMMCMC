@@ -1,0 +1,14 @@
+Package: LMMCMC
+Version: 0.0.1
+Date: 2025-09-07
+Title: MCMC for Gaussian Linear Models
+Authors@R: person("Womack", "Andrew", email="womack.andrew@gmail.com", role=c("aut","cre", "cph"))
+Imports: BAS, leaps
+Description: Package for MCMC for Bayesian posterior inference in Gaussian linear models.
+License: GPL (>= 3)
+URL: https://github.com/AJWoStat/LMMCMC
+NeedsCompilation: yes
+ByteCompile: yes
+Encoding: UTF-8
+Author: Andrew Womack [aut, cre, cph]
+Maintainer: Andrew Womack <womack.andrew@gmail.com>

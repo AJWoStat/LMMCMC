@@ -1,0 +1,39 @@
+PKG_SRCS_DIRS = data_store_struct \
+	double_is_equal \
+	get_a_prime \
+	hash_key_computer \
+	hash_table_struct \
+	int_bit_converters \
+	log_bf_computer \
+	mcmc_proposal_functions \
+	mcmc_struct model_fit_computer \
+	model_space_prior model_struct
+SOURCES = data_store_struct/data_store_struct.c \
+	double_is_equal/double_is_equal.c \
+	get_a_prime/get_a_prime.c \
+	hash_key_computer/hash_key_computer.c \
+	hash_table_struct/hash_table_struct.c \
+	int_bit_converters/int_bit_converters.c \
+	lm_mcmc_function.c \
+	log_bf_computer/log_bf_computer.c \
+	mcmc_proposal_functions/mcmc_proposal_functions.c \
+	mcmc_struct/mcmc_struct.c \
+	model_fit_computer/model_fit_computer.c \
+	model_space_prior/model_space_prior.c model_struct/model_struct.c
+OBJECTS = data_store_struct/data_store_struct.o \
+	double_is_equal/double_is_equal.o \
+	get_a_prime/get_a_prime.o \
+	hash_key_computer/hash_key_computer.o \
+	hash_table_struct/hash_table_struct.o \
+	int_bit_converters/int_bit_converters.o \
+	lm_mcmc_function.o \
+	log_bf_computer/log_bf_computer.o \
+	mcmc_proposal_functions/mcmc_proposal_functions.o \
+	mcmc_struct/mcmc_struct.o \
+	model_fit_computer/model_fit_computer.o \
+	model_space_prior/model_space_prior.o \
+	model_struct/model_struct.o
+PKG_LIBS =  $(LAPACK_LIBS) $(BLAS_LIBS) $(addprefix -L, $(PKG_SRCS_DIRS))
+PKG_CPPFLAGS = $(addprefix -I, $(PKG_SRCS_DIRS))
+
+
