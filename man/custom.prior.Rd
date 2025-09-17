@@ -2,7 +2,7 @@
 \alias{custom.prior}
 \title{Custom model space prior}
 \usage{
-  custom.prior(family="tr.geom", log.complexity.prior = dgeom(0:10, 0.5, log=TRUE) - pgeom(10, 0.5, log.p=TRUE))
+  custom.prior(family, log.complexity.prior)
 }
 \arguments{
   \item{family}{A string representing the name of the prior.}
@@ -28,5 +28,5 @@
   Andrew Womack
 }
 \examples{
-  md.prior(1)
+  custom.prior(family="tr.geom", log.complexity.prior = dgeom(0:10, 0.5, log=TRUE) - pgeom(10, 0.5, log.p=TRUE))
 }
