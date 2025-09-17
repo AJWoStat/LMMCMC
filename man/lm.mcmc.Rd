@@ -72,5 +72,5 @@ n = 100
 p = 5
 X = rnorm(n*p, n, p)
 y = rnorm(n) + 1 + X%*%c(1,1,0,0,0)
-out = lm_mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e3, mcmc.iterations=1e4, thin=1)
+out = lm.mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e3, mcmc.iterations=1e4, thin=1)
 }
