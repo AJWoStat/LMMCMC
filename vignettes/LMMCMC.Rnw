@@ -29,7 +29,7 @@ md_theta_1 <- lm.mcmc(y,X, model.prior = md.prior(1/expm1(1)),
                       burnin.iterations = 0, mcmc.iterations = 1e7)
 @
 
-<<>>=
+<<echo=FALSE>>=
 xlim = range(c(bb_1_p$size, md_theta_1$size))
 @
 
