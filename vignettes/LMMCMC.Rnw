@@ -1,0 +1,68 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage{hyperref}
+
+\title{LMMCMC: MCMC for Gaussian Linear Models}
+\author{Andrew Womack\\\href{mailto:womack.andrew@gmail.com}{womack.andrew@gmail.com}}
+\date{September 25, 2025}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+
+This vignette is to show the basic usage of the \texttt{lm.mcmc} function.
+
+<<echo=TRUE>>=
+library(graphics)
+library(LMMCMC)
+n = 200
+p = 40
+pT = 15
+snr=4
+X = matrix(rnorm(n*p), n, p)
+y = rnorm(n) + 1 + X%*%rep(c(1,0), times=c(pT, p-pT))*sqrt(snr/pT)
+bb_1_p <- lm.mcmc(y,X, model.prior = beta.binomial(1, p), 
+                  burnin.iterations = 0, mcmc.iterations = 1e7)
+md_theta_1 <- lm.mcmc(y,X, model.prior = md.prior(1/expm1(1)),
+                      burnin.iterations = 0, mcmc.iterations = 1e7)
+@
+
+<<>>=
+xlim = range(c(bb_1_p$size, md_theta_1$size))
+@
+
+<<label=boxplot_bb_1_p, echo=FALSE, eval=FALSE>>=
+with(bb_1_p, boxplot(postprobs~factor(size, levels=c(0:p)+1),
+                     ylim=c(0,1), xlim=xlim,
+                     main=expression(list(BB(1, p))),
+                     xlab='Model size', ylab='Posterior probability'))
+@
+
+<<label=boxplot_md_theta_1, echo=FALSE, eval=FALSE>>=
+with(md_theta_1, boxplot(postprobs~factor(size, levels=c(0:p)+1),
+                         ylim=c(0,1), xlim=xlim,
+                         main=expression(MD(theta==1)),
+                         xlab='Model size', ylab='Posterior probability'))
+@
+
+\begin{figure}[h]
+\centering
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+<<fig=TRUE, echo=FALSE, height=5, width=5>>=
+<<boxplot_bb_1_p>>
+@
+\end{minipage}%
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+<<fig=TRUE, echo=FALSE, height=5, width=5>>=
+<<boxplot_md_theta_1>>
+@
+\end{minipage}
+% \caption{Boxplots of posterior probability as a function of model size for the $\text{Beta-Binomial}(1,p)$ and $\text{Matryoshka_Doll}(\theta=1)$ priors.}
+% \label{fig:boxplots}
+\end{figure}
+
+\end{document}
