@@ -14,7 +14,7 @@ struct cubic_root_finder_struct crfs = {
   0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 
   3, 3,
   0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 
-  6,
+  18,
   0
   };
 
@@ -26,7 +26,7 @@ void cubic_root_finder(double * par, double * output){
    */
   
   //get coefs
-  crfs.a = par[3]; //must be non-zero, but goes unchecked
+  crfs.a = par[3]; //must be non-zero, but goes unchecked - that is the job of the caller
   crfs.b = par[2];
   crfs.c = par[1];
   crfs.d = par[0]; 
