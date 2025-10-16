@@ -23,9 +23,10 @@ pT = 15
 snr=4
 X = matrix(rnorm(n*p), n, p)
 y = rnorm(n) + 1 + X%*%rep(c(1,0), times=c(pT, p-pT))*sqrt(snr/pT)
-bb_1_p <- lm.mcmc(y,X, model.prior = beta.binomial(1, p), 
+bb_1_p <- lm.mcmc(y,X, model.prior = beta_binomial_complexity.prior(1, 0, 1, 1), 
                   burnin.iterations = 0, mcmc.iterations = 1e7)
-md_theta_1 <- lm.mcmc(y,X, model.prior = md.prior(1/expm1(1)),
+md_theta_1 <- lm.mcmc(y,X, model.prior = 
+                        matryoshka_doll.prior(1/expm1(1), 'descendants'),
                       burnin.iterations = 0, mcmc.iterations = 1e7)
 @
 

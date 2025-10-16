@@ -1,4 +1,4 @@
-lm.mcmc = function(y, X, model.prior = md.prior(1), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1){
+lm.mcmc = function(y, X, model.prior = matryoshka_doll.prior(), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1){
 
   weights = rep(1, length(y))
   base_model_indices = c()

@@ -1,5 +1,4 @@
 export(lm.mcmc)
-export(model.prior-class)
 export(matryoshka_doll.prior)
 export(binomial.prior)
 export(binomial_complexity.prior)
@@ -7,7 +6,7 @@ export(beta_binomial.prior)
 export(beta_binomial_complexity.prior)
 export(negative_binomial.prior)
 export(negative_binomial_complexity.prior)
-export(custom.prior}()}.
+export(custom.prior)
 importFrom(leaps, regsubsets)
 useDynLib(LMMCMC)
 

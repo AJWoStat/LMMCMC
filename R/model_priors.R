@@ -1,5 +1,30 @@
 setClass("model.prior", slots = c(family = "character", hyper.parameters = "list", trunc = "integer"))
 
+matryoshka_doll.prior = function(prob_ratio = 1, type = 'descendants', trunc=NA){
+  # truncated Poisson is given by type = "children" and Poisson rate is 1/prob_ratio
+  if (is.na(prob_ratio) || !is.numeric(prob_ratio) || prob_ratio<=0) stop("prob_nesting_ratio must be > 0.")
+  if (is.na(type) || !is.character(type) || (type != "descendants" && type != "children")) stop('type must be "descendants" or "children".')
+  if (is.na(trunc)) trunc = as.integer(trunc)
+  if (!is.integer(trunc)){
+    remainder = trunc - floor(trunc)
+    if(remainder < .Machine$double.eps){
+      trunc = as.integer(round(trunc))
+    }else{
+      stop("trunc must be an integer.")
+    }
+  }
+  if (trunc<=0 && !is.na(trunc)) stop("trunc must be >0 or NA.")
+  
+  structure(
+    list(
+      family = "matryoshka-doll",
+      hyper.parameters = list(prob_ratio = prob_ratio, type = type),
+      trunc = trunc
+    ),
+    class = "model.prior"
+  )
+}
+
 binomial.prior = function(prob=0.5, trunc=NA){
   if (is.na(prob) || !is.numeric(prob) || prob<=0 || prob>=1) stop("prob must be between 0 and 1.")
   if (is.na(trunc)) trunc = as.integer(trunc)
@@ -97,31 +122,6 @@ beta_binomial_complexity.prior = function(alpha = 1, intercept = 0, slope = 1, p
     class = "model.prior"
   )
   
-}
-
-matryoshka_doll.prior = function(prob_ratio = 1, type = 'descendants', trunc=NA){
-  # truncated Poisson is given by type = "children" and Poisson rate is 1/prob_ratio
-  if (is.na(prob_ratio) || !is.numeric(prob_ratio) || prob_ratio<=0) stop("prob_nesting_ratio must be > 0.")
-  if (type != "descendants" || type != "children" || !is.character(type)) stop('type must be "descendants" or "children".')
-  if (is.na(trunc)) trunc = as.integer(trunc)
-  if (!is.integer(trunc)){
-    remainder = trunc - floor(trunc)
-    if(remainder < .Machine$double.eps){
-      trunc = as.integer(round(trunc))
-    }else{
-      stop("trunc must be an integer.")
-    }
-  }
-  if (trunc<=0 && !is.na(trunc)) stop("trunc must be >0 or NA.")
-  
-  structure(
-    list(
-      family = "matryoshka-doll",
-      hyper.parameters = list(prob_ratio = prob_ratio, type = type),
-      trunc = trunc
-    ),
-    class = "model.prior"
-  )
 }
 
 negative_binomial.prior = function(size = 1, prob = 0.5, trunc = NA){
