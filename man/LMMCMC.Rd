@@ -1,14 +1,12 @@
-\name{LMMCMC}
-\alias{LMMCMC}
+\name{LMMCMC-package}
+\alias{LMMCMC-package}
+\docType{package}
 \title{LMMCMC: MCMC for Gaussian linear models.}
 \description{
 Currently devoted to just estimating model posterior probabilities. Designed to be fast and have small memory overhead.
 }
-\details{
-_PACKAGE
-}
 \seealso{
-\code{\link{lm.mcmc}()}, \code{\link{md.prior}()}, \code{\link{custom.prior}()}
+\code{\link{lm.mcmc}()}, \code{\link{model.prior-class}}, \code{\link{coef.prior-class}}.
 }
 \author{
 Andrew Womack, \cr Maintainer: Andrew Womack <womack.andrew@gmail.com>

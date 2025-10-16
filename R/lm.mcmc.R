@@ -12,43 +12,17 @@ lm.mcmc = function(y, X, model.prior = md.prior(1), burnin.iterations=1e4, mcmc.
   cc = which.max(bb$bic==min(bb$bic))
   start_model_indices = which(bb$which[cc,-1])
   proposal_probs = c(0.45, 0.45, 0.1)
-  trunc = ncol(X)
   hash_table_length = 1e6
   linked_list_length = 5
   max_load_factor = 0.75
-  if(model.prior$family=="Beta-Binomial"){
-    model.priorfamily = "Beta-Binomial"
-    model.priorpar = model.prior$hyper.parameters[1:2]
-    trunc = -1
-  }else if(model.prior$family=="Bernoulli"){
-    model.priorfamily = "Bernoulli"
-    model.priorpar = model.prior$hyper.parameters[1]
-    trunc = -1
-  }else if(model.prior$family=="MatryoshkaDoll"){
-    model.priorfamily = "MatryoshkaDoll"
-    model.priorpar = model.prior$hyper.parameters[1]
-    trunc = -1
-  }else if(model.prior$family=="Trunc-Beta-Binomial"){
-    model.priorfamily = "Trunc-Beta-Binomial"
-    model.priorpar = model.prior$hyper.parameters[1:2]
-    trunc = model.prior$hyper.parameters[3]
-  }else if(model.prior$family=="Trunc-Poisson"){
-    model.priorfamily = "Trunc-Poisson"
-    model.priorpar = model.prior$hyper.parameters[1]
-    trunc = model.prior$hyper.parameters[2]
-  }else if(model.prior$family=="Trunc-Power-Prior"){
-    model.priorfamily = "Trunc-Power-Prior"
-    model.priorpar = model.prior$hyper.parameters[1]
-    trunc = model.prior$hyper.parameters[2]
-  }else if(model.prior$family=="Uniform"){
-    model.priorfamily = "Uniform"
-    model.priorpar = 0.5
-    trunc = -1
-  }else{
-    model.priorfamily = model.prior$family
-    model.priorpar = model.prior$hyper.parameters
-    trunc = -1
-  }
+  if(model.prior$family=="matryoshka-doll") model.prior$hyper.parameters$type = ifelse(model.prior$hyper.parameters$type == "descendants", 1, 0)
+  model.priorfamily = model.prior$family
+  model.priorpar = unlist(model.prior$hyper.parameters)
+  trunc = ifelse(
+    !is.na(model.prior$trunc) && model.prior$trunc<(ncol(X) - length(base_model_indices)),
+    model.prior$trunc, 
+    ncol(X) - length(base_model_indices)
+  )
 
   result = .Call(
     "lm_mcmc_function", X, y, weights, as.integer(base_model_indices),

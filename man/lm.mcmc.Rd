@@ -15,7 +15,7 @@ lm.mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e4, mcmc.iterations=
 \arguments{
 \item{y}{Response vector.}
 \item{X}{Design matrix. A column for the intercept is added.}
-\item{model.prior}{An object of class "prior" following the construction from BAS, see Details.}
+\item{model.prior}{An object of class "model.prior", see Details.}
 \item{burnin.iterations}{Number of burn-in iterations.}
 \item{mcmc.iterations}{Number of MCMC iterations to return.}
 \item{thin}{Number (plus 1) of iterations to skip between MCMC recording.}
@@ -38,30 +38,24 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
 }
 
 \details{
-  Priors that work as \code{model.prior} input to \code{lm.mcmc}:
-
-  From this package: \code{\link{md.prior}()} and those built using \code{\link{custom.prior}()}.
-
-  Imported from BAS:
-  \code{\link[BAS]{uniform}()},
-  \code{\link[BAS]{Bernoulli}()},
-  \code{\link[BAS]{beta.binomial}()},
-  \code{\link[BAS]{tr.poisson}()},
-  \code{\link[BAS]{tr.beta.binomial}()},
-  \code{\link[BAS]{tr.power.prior}()}.
-
-
+  Priors that work as \code{model.prior} input to \code{lm.mcmc} must be constructed from
+  package-supplied functions that make objects of the class \code{model.prior} (see \code{\link{model.prior-class}}).
+  Custom user-supplied vectors for \eqn{\log(P(|M|=k))} can be converted to this class using \code{\link{custom.prior}()}.
+  
+  The "number of predictors" \eqn{p} used in the descriptions in the help files for those model priors is \code{ncol(X)}.
 }
 
 \seealso{
-  \code{\link{md.prior}()}, \code{\link{custom.prior}()}, \code{\link[BAS]{uniform}()},
-  \code{\link[BAS]{Bernoulli}()},
-  \code{\link[BAS]{beta.binomial}()},
-  \code{\link[BAS]{tr.poisson}()},
-  \code{\link[BAS]{tr.beta.binomial}()},
-  \code{\link[BAS]{tr.power.prior}()}.
+  \code{\link{model.prior-class}},\cr
+  \code{\link{matryoshka_doll.prior}()}, \cr
+  \code{\link{binomial.prior}()},\cr
+  \code{\link{binomial_complexity.prior}()}, \cr
+  \code{\link{beta_binomial.prior}()}, \cr
+  \code{\link{beta_binomial_complexity.prior}()}, \cr
+  \code{\link{negative_binomial.prior}()}, \cr
+  \code{\link{negative_binomial_complexity.prior}()}, \cr
+  \code{\link{custom.prior}()}.
 }
-
 
 \author{
   Andrew Womack
