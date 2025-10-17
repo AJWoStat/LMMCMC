@@ -17,7 +17,8 @@
 #include "int_bit_converters/int_bit_converters.h"
 #include "model_fit_computer/model_fit_computer.h"
 #include "model_space_prior/model_space_prior.h"
-#include "log_bf_computer/log_bf_computer.h"
+#include "log_bf_integrator/log_bf_integrator.h"
+#include "coef_prior_struct/coef_prior_struct.h"
 // #include "data_store_struct.h"
 // #include "model_struct.h"
 // #include "mcmc_struct.h"
@@ -31,6 +32,7 @@
 extern SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_indices, //data info
               // SEXP bf_type, SEXP bf_params, SEXP scale_by_rank,  //coefficient prior info - for later
               SEXP msp_family, SEXP msp_params, SEXP trunc, //model space prior info, value of trunc is ignored unless a truncated family is specified
+              SEXP coef_family, SEXP coef_params, SEXP eff, //coefficient prior info
               SEXP include_coef, SEXP include_vcov, //return info (must be 0 for now)
               SEXP start_model_indices, //start model
               SEXP n_burnin, SEXP n_thin, SEXP n_draws, SEXP proposal_probs, //mcmc info

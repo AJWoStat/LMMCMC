@@ -24,13 +24,12 @@ snr=4
 X = matrix(rnorm(n*p), n, p)
 y = rnorm(n) + 1 + X%*%rep(c(1,0), times=c(pT, p-pT))*sqrt(snr/pT)
 bb_1_p <- lm.mcmc(
-  y, X, model.prior = beta_binomial_complexity.prior(), 
+  y, X, model.prior = beta_binomial_complexity.prior(),
+  coef.prior = hyper_g.prior(),
   burnin.iterations = 0, mcmc.iterations = 1e6
 )
-md <- lm.mcmc(
-  y, X, model.prior = matryoshka_doll.prior(),
-  burnin.iterations = 0, mcmc.iterations = 1e6
-)
+md <- lm.mcmc(y, X, model.prior = matryoshka_doll.prior(),
+  coef.prior = hyper_g.prior(), burnin.iterations = 0, mcmc.iterations = 1e6)
 @
 
 <<echo=FALSE>>=

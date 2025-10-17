@@ -28,6 +28,7 @@
 \seealso{
   \code{\link{lm.mcmc}()},\cr
   \code{\link{coef.prior-class}},\cr
+  \code{\link{g.prior}()},\cr
   \code{\link{zellner_siow.prior}()},\cr
   \code{\link{hyper_g.prior}()},\cr
   \code{\link{inverse_gamma.prior}()},\cr

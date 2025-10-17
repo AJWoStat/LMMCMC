@@ -10,7 +10,12 @@ Current implementation uses a g/n-prior with g=1.
 Starting model is the minimal forward stepwise BIC model (with a maximum of up to 20 predictors).
 }
 \usage{
-lm.mcmc(y, X, model.prior = matryoshka_doll.prior(), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1)
+lm.mcmc(
+  y, X, 
+  model.prior = matryoshka_doll.prior(), 
+  coef.prior = hyper_g.prior(),
+  burnin.iterations=1e4, mcmc.iterations=1e6, thin=1
+)
 }
 \arguments{
 \item{y}{Response vector.}
@@ -59,6 +64,7 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
   \cr\cr
   Regression coefficient priors:\cr
   \code{\link{coef.prior-class}},\cr
+  \code{\link{g.prior}()},\cr
   \code{\link{zellner_siow.prior}()},\cr
   \code{\link{hyper_g.prior}()},\cr
   \code{\link{intrinsic.prior}()},\cr

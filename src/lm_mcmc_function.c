@@ -4,6 +4,7 @@
 SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_indices, //data info
               // SEXP bf_type, SEXP bf_params, SEXP scale_by_rank,  //coefficient prior info - for later
               SEXP msp_family, SEXP msp_params, SEXP trunc, //model space prior info, value of trunc is ignored unless a truncated family is specified
+              SEXP coef_family, SEXP coef_params, SEXP eff, //coefficient prior info
               SEXP include_coef, SEXP include_vcov, //return info (must be 0 for now)
               SEXP start_model_indices, //start model
               SEXP n_burnin, SEXP n_thin, SEXP n_draws, SEXP proposal_probs, //mcmc info
@@ -16,6 +17,9 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   SEXP base_model_indices_R = PROTECT(duplicate(base_model_indices));
   SEXP msp_family_R = PROTECT(duplicate(msp_family));
   SEXP msp_params_R = PROTECT(duplicate(msp_params));
+  SEXP coef_family_R = PROTECT(duplicate(coef_family)); 
+  SEXP coef_params_R = PROTECT(duplicate(coef_params));
+  SEXP eff_R = PROTECT(duplicate(eff));
   SEXP trunc_R = PROTECT(duplicate(trunc));
   SEXP include_coef_R = PROTECT(duplicate(include_coef));
   SEXP include_vcov_R = PROTECT(duplicate(include_vcov));
@@ -53,17 +57,33 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
 
   // setting model space prior
   void *vmax = vmaxget(); //just trying to get away from the R_alloc allocation for family_in
-  const char * family_in = CHAR(STRING_ELT(msp_family_R,0));
-  int params_length = Rf_length(msp_params_R);
-  double * params_in = malloc(params_length*sizeof(double));
-  for(int i=0; i<params_length; i++) params_in[i] = REAL(msp_params_R)[i];
+  const char * msp_family_in = CHAR(STRING_ELT(msp_family_R,0));
+  int msp_params_length = Rf_length(msp_params_R);
+  double * msp_params_in = malloc(msp_params_length*sizeof(double));
+  for(int i=0; i<msp_params_length; i++) msp_params_in[i] = REAL(msp_params_R)[i];
   int trunc_in = INTEGER(trunc_R)[0];
-  model_space_prior_constructor(family_in, params_in, params_length, trunc_in);
+  model_space_prior_constructor(msp_family_in, msp_params_in, msp_params_length, trunc_in);
   vmaxset(vmax); //just trying to get away from the R_alloc allocation for family_in
-  free(params_in); params_in=NULL;
-
+  free(msp_params_in); msp_params_in=NULL;
+  
+  // setting coefficient prior
+  vmax = vmaxget(); //just trying to get away from the R_alloc allocation for family_in
+  const char * coef_family_in = CHAR(STRING_ELT(coef_family_R,0));
+  int coef_params_length = Rf_length(coef_params_R);
+  double * coef_params_in = malloc(coef_params_length*sizeof(double));
+  for(int i=0; i<coef_params_length; i++) coef_params_in[i] = REAL(coef_params_R)[i];
+  int eff_in = INTEGER(eff_R)[0];
+  double coef_scale_in = coef_params_in[0];
+  double coef_shape_in[2] = {1.00, 1.00};
+  if(coef_params_length>=1) coef_shape_in[0] = coef_params_in[1];
+  if(coef_params_length>=2) coef_shape_in[1] = coef_params_in[2];
+  coef_prior_struct_constructor(eff_in, coef_scale_in, coef_shape_in, coef_family_in);
+  vmaxset(vmax); //just trying to get away from the R_alloc allocation for family_in
+  free(coef_params_in); msp_params_in=NULL;
+  
   // log_bf_constructor(); //not yet
-
+  log_bf_integrator_struct_constructor(&data, &coef_prior);
+  
   //setting model fit
   model_fit_workspace_constructor();
 
@@ -231,7 +251,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
 
   PutRNGstate();
 
-  UNPROTECT(14);
+  UNPROTECT(17);
   return(out);
 
 }

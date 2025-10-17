@@ -12,7 +12,7 @@
 #include "../int_bit_converters/int_bit_converters.h"
 #include "../data_store_struct/data_store_struct.h"
 #include "../model_space_prior/model_space_prior.h"
-#include "../log_bf_computer/log_bf_computer.h"
+#include "../log_bf_integrator/log_bf_integrator.h"
 // #include "model_struct.h"
 // #include "int_bit_converters.h"
 // #include "data_store_struct.h"

@@ -1,5 +1,8 @@
-lm.mcmc = function(y, X, model.prior = matryoshka_doll.prior(), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1){
-
+lm.mcmc = function(
+    y, X, 
+    model.prior = matryoshka_doll.prior(), coef.prior = hyper_g.prior(), 
+    burnin.iterations=1e4, mcmc.iterations=1e6, thin=1
+){
   weights = rep(1, length(y))
   base_model_indices = c()
   include_coef = 0
@@ -23,10 +26,14 @@ lm.mcmc = function(y, X, model.prior = matryoshka_doll.prior(), burnin.iteration
     model.prior$trunc, 
     ncol(X) - length(base_model_indices)
   )
+  coef.priorfamily = coef.prior$family
+  coef.priorpar = unlist(coef.prior$hyper.parameters)
+  eff = ifelse(coef.prior$eff, 1, 0)
 
   result = .Call(
     "lm_mcmc_function", X, y, weights, as.integer(base_model_indices),
     model.priorfamily, model.priorpar, as.integer(trunc),
+    coef.priorfamily, coef.priorpar, as.integer(eff),
     as.integer(include_coef), as.integer(include_vcov),
     as.integer(start_model_indices),
     as.integer(burnin.iterations), as.integer(thin), as.integer(mcmc.iterations), proposal_probs,

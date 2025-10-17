@@ -1,5 +1,18 @@
 setClass("coef.prior", slots = c(family = "character", hyper.parameters = "list", eff = "logical"))
 
+g.prior = function(scale = 1, eff = TRUE){
+  if (is.na(scale) || !is.numeric(scale) || scale<=0) stop("scale must be > 0.")
+  if (is.na(eff) || !is.logical(eff) || (eff != TRUE && eff != FALSE)) stop("eff must be TRUE or FALSE.")
+  structure(
+    list(
+      family = "g",
+      hyper.parameters = list(scale = scale),
+      eff = eff
+    ),
+    class = "coef.prior"
+  )
+}
+
 zellner_siow.prior = function(scale = 1, eff = TRUE){
   if (is.na(scale) || !is.numeric(scale) || scale<=0) stop("scale must be > 0.")
   if (is.na(eff) || !is.logical(eff) || (eff != TRUE && eff != FALSE)) stop("eff must be TRUE or FALSE.")

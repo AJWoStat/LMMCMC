@@ -55,5 +55,12 @@ There are no methods for the class.
 
 \seealso{
   \code{\link{lm.mcmc}()}, \cr
+  \code{\link{g.prior}()},\cr
+  \code{\link{zellner_siow.prior}()},\cr
+  \code{\link{hyper_g.prior}()},\cr
+  \code{\link{intrinsic.prior}()},\cr
+  \code{\link{inverse_gamma.prior}()},\cr
+  \code{\link{beta_prime.prior}()},\cr
+  \code{\link{inverse_beta.prior}()}.
   
 }
