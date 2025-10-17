@@ -46,6 +46,7 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
 }
 
 \seealso{
+  Model space priors:\cr
   \code{\link{model.prior-class}},\cr
   \code{\link{matryoshka_doll.prior}()}, \cr
   \code{\link{binomial.prior}()},\cr
@@ -55,6 +56,16 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
   \code{\link{negative_binomial.prior}()}, \cr
   \code{\link{negative_binomial_complexity.prior}()}, \cr
   \code{\link{custom.prior}()}.
+  \cr\cr
+  Regression coefficient priors:\cr
+  \code{\link{coef.prior-class}},\cr
+  \code{\link{zellner_siow.prior}()},\cr
+  \code{\link{hyper_g.prior}()},\cr
+  \code{\link{intrinsic.prior}()},\cr
+  \code{\link{inverse_gamma.prior}()},\cr
+  \code{\link{beta_prime.prior}()}\cr,
+  \code{\link{inverse_beta.prior}()}.
+  
 }
 
 \author{
