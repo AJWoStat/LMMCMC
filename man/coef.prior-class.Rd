@@ -19,12 +19,19 @@ There are no methods for the class.
   The \code{eff} slot is a logical. 
   
   
-  For a model \eqn{M} with design matrix \eqn{(\boldsymbol{1}\ \mathbf{X}_M)} where \eqn{\mathbf{X}_M^\prime \boldsymbol{1} = \boldsymbol{0}}, the response \eqn{\mathbf{y}=(y_1, \ldots, y_n)} has model
+  For a model \eqn{M} with design matrix \eqn{(\boldsymbol{X}_0\ \mathbf{X}_M)} where \eqn{\mathbf{X}_M^\prime \boldsymbol{X}_0 = \boldsymbol{0}}, the response \eqn{\mathbf{y}=(y_1, \ldots, y_n)} has model
   \deqn{
-    \mathbf{y} = \alpha\boldsymbol{1} + \mathbf{X}_M\boldsymbol{\beta} + \frac{1}{\sqrt{\phi}}\boldsymbol{\epsilon}
+    \mathbf{y} = \boldsymbol{X}_0\boldsymbol{\alpha} + \mathbf{X}_M\boldsymbol{\beta} + \frac{1}{\sqrt{\phi}}\boldsymbol{\epsilon}
   }
-  where \eqn{\boldsymbol{\epsilon}\sim \mathcal{N}_n(\mathbf{0},\mathbf{I})} and \eqn{\phi} is the precision parameter. The prior for \eqn{(\alpha, \boldsymbol{\beta}, \phi)} is specified as a 
-  null model based mixture of \eqn{g}-over-\eqn{n} priors. Specifically \eqn{(\alpha,\phi)\sim \phi^{-1}} and the prior for \eqn{\boldsymbol{\beta}} is
+  where \eqn{\boldsymbol{\epsilon}\sim \mathcal{N}_n(\mathbf{0},\mathbf{I})} and \eqn{\phi} is the precision parameter. 
+  The model 
+  \deqn{
+    \mathbf{y} = \boldsymbol{X}_0\boldsymbol{\alpha} + \frac{1}{\sqrt{\phi}}\boldsymbol{\epsilon}
+  }
+  is the "base model" for the model space and all models must contain the predictors in \eqn{\boldsymbol{X}_0}, which contains a column \eqn{\boldsymbol{1}} for the intercept.
+  
+  The prior for \eqn{(\boldsymbol{\alpha}, \boldsymbol{\beta}, \phi)} is specified as a 
+  null model based mixture of \eqn{g}-over-\eqn{n} priors. Specifically \eqn{(\boldsymbol{\alpha},\phi)\sim \phi^{-1}} and the prior for \eqn{\boldsymbol{\beta}} is
   \deqn{
     \boldsymbol{\beta}|g, \alpha, \phi, \mathbf{X}_M \sim \mathcal{N}_{|M|}\left(\mathbf{0}, \frac{gn}{\phi q_M}\left(\mathbf{X}_M^\prime \mathbf{X}_M\right)^{-1}\right).
   }
@@ -43,7 +50,7 @@ There are no methods for the class.
   Three well-established scaled mixtures of \eqn{g}-priors are the Zellner-Siow, Hyper-\eqn{g}, and Intrinsic Priors. We include these priors on \eqn{g} and extend them.
   The Zellner-Siow Prior is extended by setting a Inverse-Gamma prior on \eqn{g}. 
   The Hyper-\eqn{g} Prior is extended by setting a Beta-Prime distribution on \eqn{g}. 
-  The Intrinsic Prior is extended by setting a Inverse-Beta distribution on \eqn{g} (that is \eqn{w=1/g} follows a Beta distribution).
+  The Intrinsic Prior is extended by setting a Inverse-Beta distribution on \eqn{g} (in which \eqn{w=1/g} follows a Beta distribution).
   
   All of the priors include a \code{scale} parameter as the first component of \code{hyperparameters}.
   Setting \code{eff=FALSE} and \code{scale=1/n} produces scaled mixtures of \eqn{g}-priors.

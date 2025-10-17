@@ -1,19 +1,27 @@
 lm.mcmc = function(
-    y, X, 
+    y, X, base.model.indices = c(),
     model.prior = matryoshka_doll.prior(), coef.prior = hyper_g.prior(), 
-    burnin.iterations=1e4, mcmc.iterations=1e6, thin=1
+    burnin.iterations=1e4, mcmc.iterations=1e6, thin=1, 
+    start.model.indices = NA, max.size.start = 20
 ){
   weights = rep(1, length(y))
-  base_model_indices = c()
+  base_model_indices = as.integer(base.model.indices)
+  base_model_indices = base_model_indices[base_model_indices<=ncol(X)]
+  base_model_indices = base_model_indices[base_model_indices>0]
   include_coef = 0
   include_vcov = 0
-  warn_curr = options("warn")$warn
-  options(warn=-1)
-  aa = leaps::regsubsets(X,y, method="forward", nbest=1, nested = TRUE, nvmax=min(c(length(y)-1, dim(X)[2], 20)))
-  options(warn = warn_curr)
-  bb = summary(aa)
-  cc = which.max(bb$bic==min(bb$bic))
-  start_model_indices = which(bb$which[cc,-1])
+  if(any(is.na(start.model.indices))){
+    warn_curr = options("warn")$warn
+    options(warn=-1)
+    aa = leaps::regsubsets(X,y, method="forward", force.in = base_model_indices,
+                           nbest=1, nested = TRUE, nvmax=min(c(length(y)-1, dim(X)[2], max.size.start)))
+    options(warn = warn_curr)
+    bb = summary(aa)
+    cc = which.max(bb$bic==min(bb$bic))
+    start_model_indices = which(bb$which[cc,-1])
+  }else{
+    start_model_indices = sort(unique(c(start.model.indices, base_model_indices)))
+  }
   proposal_probs = c(0.45, 0.45, 0.1)
   hash_table_length = 1e6
   linked_list_length = 5

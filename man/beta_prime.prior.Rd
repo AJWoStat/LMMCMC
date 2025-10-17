@@ -1,8 +1,8 @@
-\name{hyper_g.prior}
-\alias{hyper_g.prior}
-\title{Hyper_g Regression Coefficient Prior}
+\name{beta_prime.prior}
+\alias{beta_prime.prior}
+\title{Beta-Prime Regression Coefficient Prior}
 \usage{
-  hyper_g.prior(scale = 1, shape_0 = 1, shape_1 = 0.5, eff=TRUE)
+  beta_prime.prior(scale = 1, shape_0 = 1, shape_1 = 0.5, eff=TRUE)
 }
 \arguments{
   \item{scale}{Scaling on \eqn{g}. Must be positive.}
@@ -22,9 +22,9 @@
 \details{
   The prior distribution on 
   \deqn{
-  \zeta=\dfrac{g}{\code{scale}+g}
-  \quad\text{is}\quad
-  \zeta\sim\text{Beta}\left(\code{shape_0},\code{shape_1}\right).
+    \zeta=\dfrac{g}{\code{scale}+g}
+    \quad\text{is}\quad
+    \zeta\sim\text{Beta}\left(\code{shape\_0},\code{shape\_1}\right).
   } 
 }
 \seealso{

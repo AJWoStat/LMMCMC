@@ -2,28 +2,27 @@
 \alias{lm.mcmc}
 \title{MCMC for Gaussian linear models}
 \description{
-Proposal kernels include single random inclusion indicator change,
-one in and one out inclusion indicator changes, and
-random inclusion indicator vector replacement.
-These are called with proportions 0.45, 0.45, and 0.1, respectively.
-Current implementation uses a g/n-prior with g=1.
-Starting model is the minimal forward stepwise BIC model (with a maximum of up to 20 predictors).
+
 }
 \usage{
 lm.mcmc(
-  y, X, 
+  y, X, base.model.indices = c(),
   model.prior = matryoshka_doll.prior(), 
   coef.prior = hyper_g.prior(),
-  burnin.iterations=1e4, mcmc.iterations=1e6, thin=1
+  burnin.iterations=1e4, mcmc.iterations=1e6, thin=1, 
+  start.model.indices = NA, max.size.start = 20
 )
 }
 \arguments{
 \item{y}{Response vector.}
-\item{X}{Design matrix. A column for the intercept is added.}
+\item{X}{Design matrix. A column for the intercept is added and so \code{X} should not include a column for the intercept.}
+\item{base.model.indices}{Index numbers for columns of \code{X} that must be included in every model.}
 \item{model.prior}{An object of class "model.prior", see Details.}
+\item{coef.prior}{An object of class "coef.prior", see Details.}
 \item{burnin.iterations}{Number of burn-in iterations.}
 \item{mcmc.iterations}{Number of MCMC iterations to return.}
 \item{thin}{Number (plus 1) of iterations to skip between MCMC recording.}
+\item{start.model.indices}{Index numbers for columns of \code{X} that comprise the starting model for the MCMC. }
 }
 \value{
 A list in the style of BAS. All but \code{mcmc.draws} share a common index.
@@ -43,11 +42,27 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
 }
 
 \details{
+  \strong{Model space priors:}\cr
   Priors that work as \code{model.prior} input to \code{lm.mcmc} must be constructed from
   package-supplied functions that make objects of the class \code{model.prior} (see \code{\link{model.prior-class}}).
   Custom user-supplied vectors for \eqn{\log(P(|M|=k))} can be converted to this class using \code{\link{custom.prior}()}.
   
-  The "number of predictors" \eqn{p} used in the descriptions in the help files for those model priors is \code{ncol(X)}.
+  The "number of predictors" \eqn{p} used in the descriptions in the help files for those model priors is \code{ncol(X) - length(base_model_indices)}.
+  \cr\cr
+  
+  \strong{Regression coefficient priors:}\cr
+  Priors that work as \code{coef.prior} input to \code{lm.mcmc} must be constructed from
+  package-supplied functions that make objects of the class \code{coef.prior} (see \code{\link{coef.prior-class}}).
+  \cr\cr
+  
+  \strong{MCMC details:}\cr
+  Proposal kernels include single random inclusion indicator change,
+  one in and one out inclusion indicator changes, and
+  random inclusion indicator vector replacement.
+  These are called with proportions 0.45, 0.45, and 0.1, respectively.
+  
+  The starting model is either user supplied or set as the minimal forward stepwise BIC model (up to \code{max_size_start}).
+  Any indices in \code{base.model.indices} that are missing from supplied \code{start.model.indices} are added to \code{start.model.indices}.
 }
 
 \seealso{
@@ -69,7 +84,7 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
   \code{\link{hyper_g.prior}()},\cr
   \code{\link{intrinsic.prior}()},\cr
   \code{\link{inverse_gamma.prior}()},\cr
-  \code{\link{beta_prime.prior}()}\cr,
+  \code{\link{beta_prime.prior}()},\cr
   \code{\link{inverse_beta.prior}()}.
   
 }
@@ -83,5 +98,5 @@ n = 100
 p = 5
 X = matrix(rnorm(n*p), n, p)
 y = rnorm(n) + 1 + X\%*\%rep(c(1,0), times = c(2, p-2))
-out = lm.mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e3, mcmc.iterations=1e4, thin=1)
+out = lm.mcmc(y, X)
 }
