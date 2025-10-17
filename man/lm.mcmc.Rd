@@ -10,7 +10,7 @@ Current implementation uses a g/n-prior with g=1.
 Starting model is the minimal forward stepwise BIC model (with a maximum of up to 20 predictors).
 }
 \usage{
-lm.mcmc(y, X, model.prior = md.prior(1), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1)
+lm.mcmc(y, X, model.prior = matryoshka_doll.prior(), burnin.iterations=1e4, mcmc.iterations=1e6, thin=1)
 }
 \arguments{
 \item{y}{Response vector.}

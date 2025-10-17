@@ -38,7 +38,7 @@ void model_space_prior_constructor(const char * model_space_family_in, const dou
       log_nc = logspace_sum(model_space_prior.log_prior_complexity, model_space_prior.trunc+1);
       for(int i=0; i<=model_space_prior.trunc; i++) model_space_prior.log_prior_complexity[i] -= log_nc;
     }
-  }else if (strcmp(model_space_prior.family, "beta-binomial_complexity") == 0){
+  }else if (strcmp(model_space_prior.family, "beta-binomial-complexity") == 0){
     double shape_0 = model_space_prior.parameters[0];
     double shape_1 = (model_space_prior.parameters[1]+model_space_prior.parameters[2]*pow(p, model_space_prior.parameters[3]));
     for(int i=0; i<=model_space_prior.trunc; i++) model_space_prior.log_prior_complexity[i] = lchoose(p, (double)i) + lbeta(shape_0+(double)i, shape_1+p-(double)i) - lbeta(shape_0, shape_1);

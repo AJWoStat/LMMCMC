@@ -23,15 +23,18 @@ pT = 15
 snr=4
 X = matrix(rnorm(n*p), n, p)
 y = rnorm(n) + 1 + X%*%rep(c(1,0), times=c(pT, p-pT))*sqrt(snr/pT)
-bb_1_p <- lm.mcmc(y,X, model.prior = beta_binomial_complexity.prior(1, 0, 1, 1), 
-                  burnin.iterations = 0, mcmc.iterations = 1e7)
-md_theta_1 <- lm.mcmc(y,X, model.prior = 
-                        matryoshka_doll.prior(1/expm1(1), 'descendants'),
-                      burnin.iterations = 0, mcmc.iterations = 1e7)
+bb_1_p <- lm.mcmc(
+  y, X, model.prior = beta_binomial_complexity.prior(), 
+  burnin.iterations = 0, mcmc.iterations = 1e6
+)
+md <- lm.mcmc(
+  y, X, model.prior = matryoshka_doll.prior(),
+  burnin.iterations = 0, mcmc.iterations = 1e6
+)
 @
 
 <<echo=FALSE>>=
-xlim = range(c(bb_1_p$size, md_theta_1$size))
+xlim = range(c(bb_1_p$size, md$size))
 @
 
 <<label=boxplot_bb_1_p, echo=FALSE, eval=FALSE>>=
@@ -41,10 +44,10 @@ with(bb_1_p, boxplot(postprobs~factor(size, levels=c(0:p)+1),
                      xlab='Model size', ylab='Posterior probability'))
 @
 
-<<label=boxplot_md_theta_1, echo=FALSE, eval=FALSE>>=
-with(md_theta_1, boxplot(postprobs~factor(size, levels=c(0:p)+1),
+<<label=boxplot_md, echo=FALSE, eval=FALSE>>=
+with(md, boxplot(postprobs~factor(size, levels=c(0:p)+1),
                          ylim=c(0,1), xlim=xlim,
-                         main=expression(MD(theta==1)),
+                         main=expression(MD(eta==1)),
                          xlab='Model size', ylab='Posterior probability'))
 @
 
@@ -59,7 +62,7 @@ with(md_theta_1, boxplot(postprobs~factor(size, levels=c(0:p)+1),
 \begin{minipage}[b]{0.5\linewidth}
 \centering
 <<fig=TRUE, echo=FALSE, height=5, width=5>>=
-<<boxplot_md_theta_1>>
+<<boxplot_md>>
 @
 \end{minipage}
 % \caption{Boxplots of posterior probability as a function of model size for the $\text{Beta-Binomial}(1,p)$ and $\text{Matryoshka_Doll}(\theta=1)$ priors.}
