@@ -1,6 +1,7 @@
 #ifndef CUBIC_ROOT_FINDER_H
 #define CUBIC_ROOT_FINDER_H
 
+#include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include"R_ext/Lapack.h"

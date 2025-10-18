@@ -53,7 +53,7 @@ model_t * model_constructor(const int bitrep_length, const int include_coef_esti
 void model_copy(model_t * mod, const model_t * mod_in){
   if(mod_in == NULL){model_destructor(&mod); return;}
   if(mod->bitrep_length!=mod_in->bitrep_length){
-    Rprintf("Bad model_struct copy: bitrep lengths differ. No copy occurred.\n");
+    printf("Bad model_struct copy: bitrep lengths differ. No copy occurred.\n");
     return;
   }
   for(int i=0; i<mod->bitrep_length; i++) mod->bitrep[i] = mod_in->bitrep[i];
@@ -141,7 +141,7 @@ int model_is_equal(const model_t * mod_1, const model_t * mod_2, int only_bitrep
 void model_bitrep_replacement(model_t * mod, const uint32_t * bitrep, const int bitrep_length){
   //resets model information after bitrep replacement
   if(mod->bitrep_length != bitrep_length){
-    Rprintf("Warning: mod->bitrep can't be replaced with a bitrep of a different length (the attempted replacement was ignored).");
+    printf("Warning: mod->bitrep can't be replaced with a bitrep of a different length (the attempted replacement was ignored).");
     return;
   }
   mod->size = uint32_vec_count_bits(bitrep, bitrep_length);
@@ -166,7 +166,7 @@ void model_bit_flips(model_t * mod, const int * bits, const int bits_length){
     bucket = bucket_and_location.quot;
     location = bucket_and_location.rem;
     if(bucket > mod->bitrep_length){
-      Rprintf("Warning: attempted to flip a bit that was not in mod->bitrep (attempted bit flip was ignored).");
+      printf("Warning: attempted to flip a bit that was not in mod->bitrep (attempted bit flip was ignored).");
     }else{
       mod->bitrep[bucket] ^= powers_of_2_uint32[location];
     }
@@ -196,16 +196,16 @@ void model_print(const model_t * mod){
   Rprintf("log_prior: %f\n", mod->log_prior);
   Rprintf("log_BF0: %f\n", mod->log_BF0);
   if(mod->coef != NULL){
-    Rprintf("coef: "); for(int i=0; i<mod->size; i++) Rprintf("%f ", mod->coef[i]); Rprintf("\n");
-    Rprintf("coef_sd: "); for(int i=0; i<mod->size; i++) Rprintf("%f ", mod->coef_sd[i]); Rprintf("\n");
+    printf("coef: "); for(int i=0; i<mod->size; i++) printf("%f ", mod->coef[i]); printf("\n");
+    printf("coef_sd: "); for(int i=0; i<mod->size; i++) printf("%f ", mod->coef_sd[i]); printf("\n");
     if(mod->coef_vcov_upper != NULL){
-      Rprintf("coef_vcov_upper:\n");
+      printf("coef_vcov_upper:\n");
       for(int i=0; i<mod->size; i++){
-        for(int j=0; j<i; j++) Rprintf("%f ", 0.0);
-        for(int j=i; j<mod->size; j++) Rprintf("%f ", mod->coef_vcov_upper[(j*(j+1))/2+i]);
-        Rprintf("\n");
+        for(int j=0; j<i; j++) printf("%f ", 0.0);
+        for(int j=i; j<mod->size; j++) printf("%f ", mod->coef_vcov_upper[(j*(j+1))/2+i]);
+        printf("\n");
       }
-      Rprintf("\n");
+      printf("\n");
     }
   }
 }

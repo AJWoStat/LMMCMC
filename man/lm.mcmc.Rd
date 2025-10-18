@@ -2,9 +2,7 @@
 \alias{lm.mcmc}
 \title{MCMC for Gaussian linear models}
 \description{
-MCMC for Gaussian Linear Models. 
-Currently only produces output of model probabilities.
-Optional output of model coefficient expectations and variances pending.
+
 }
 \usage{
 lm.mcmc(
@@ -25,7 +23,6 @@ lm.mcmc(
 \item{mcmc.iterations}{Number of MCMC iterations to return.}
 \item{thin}{Number (plus 1) of iterations to skip between MCMC recording.}
 \item{start.model.indices}{Index numbers for columns of \code{X} that comprise the starting model for the MCMC. }
-\item{max.size.start}{Maximum of starting model if it is not user supplied.}
 }
 \value{
 A list in the style of BAS. All but \code{mcmc.draws} share a common index.

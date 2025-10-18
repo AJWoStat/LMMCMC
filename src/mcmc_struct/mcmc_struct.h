@@ -1,11 +1,15 @@
 #ifndef MCMC_STRUCT_H
 #define MCMC_STRUCT_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "../model_struct/model_struct.h"
 #include "../hash_table_struct/hash_table_struct.h"
 #include "../mcmc_proposal_functions/mcmc_proposal_functions.h"
+// #include "model_struct.h"
+// #include "hash_table_struct.h"
+// #include "mcmc_proposal_functions.h"
 
 struct mcmc_struct{
   model_t * mod_curr;

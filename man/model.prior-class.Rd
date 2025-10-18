@@ -1,5 +1,5 @@
 \name{model.prior-class}
-\alias{model.prior-class}
+\alias{mode.prior-class}
 \docType{class}
 \title{
 Class \code{model.prior} for Model Space Priors for Regression Models

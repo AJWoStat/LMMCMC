@@ -2,7 +2,7 @@
 \alias{negative_binomial_complexity.prior}
 \title{Negative-Binomial with Complexity Penalization Model Space Prior}
 \usage{
-  negative_binomial_complexity.prior(size = 1, intercept = 0, slope = 1, power = 1, trunc=NA)
+  negative_binomial.prior(size = 1, prob = 0.5, trunc = NA)
 }
 \arguments{
   \item{size}{The number of successes defining the stopping rule for the Negative-Binomial distribution. Must be between positive.}
