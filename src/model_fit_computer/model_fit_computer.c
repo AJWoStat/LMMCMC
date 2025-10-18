@@ -90,7 +90,7 @@ void model_fit_computer(model_t * mod){
   
   mod->log_BF0 = get_log_bf(mod);
   
-  mod->shrinkage_factor = get_shrinkage_factor(mod);
+  // mod->shrinkage_factor = get_shrinkage_factor(mod);
   
   //we need to finish with the coefs and such
   
