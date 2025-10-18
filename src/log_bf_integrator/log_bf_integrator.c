@@ -122,7 +122,7 @@ double get_log_bf(struct model_struct * model){
   log_bf_integrator.p = (double)(model->size);
   log_bf_integrator.r = (double)(model->rank);
   log_bf_integrator.q = log_bf_integrator.eff == 1 ? log_bf_integrator.r : 1.00;
-  log_bf_integrator.Rsq = model->Rsq;
+  log_bf_integrator.Rsq = model->Rsq*data.intercept_only_model_SSE/data.base_model_SSE;
   double out = (*get_log_bf_prior_specific)(model);
   return(out);
 }
@@ -332,44 +332,6 @@ void log_bf_beta_prime_integrand(double * t, int n, void * ex)
   return;
 }
 
-//old version before change to use the log space arithmetic functions in order to make it more numerically sound
-// void log_bf_beta_prime_integrand(double * t, int n, void * ex)
-// {
-//   struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
-//   double n_obs = par->n;
-//   double nmrover2 = 0.5*(n_obs-par->r);
-//   double nmr0over2 = 0.5*(n_obs-par->r_0);
-//   double g_0 = par->gamma_0;
-//   double g_1 = par->gamma_1;
-//   double a = par->a;
-//   double alpha = par->shape_0;
-//   double beta = par->shape_1;
-//   double saq = par->scale*a*par->q;
-//   double n1mRsq = n_obs*(1.00-par->Rsq);
-//   double max_log = par->max_log_integrand;
-//   double log_const = 0.5*(par->r-par->r_0)*log(saq) + alpha*log(a) - lbeta(alpha, beta) - max_log;
-//   double power_t = g_0*(0.5*(par->r-par->r_0)+alpha)-1.00;
-//   double power_1mt = g_1*beta-1.00;
-//   double t_to_pow_g0, onemt_to_pow_g1;
-//   for(int i=0; i<n; i++){
-//     onemt_to_pow_g1 = pow(1.00-t[i], g_1);
-//     t_to_pow_g0 = pow(t[i], g_0);
-//     t[i] = log_const +
-//       nmrover2*log(onemt_to_pow_g1*n_obs+t_to_pow_g0*saq) +
-//       -nmr0over2*log(onemt_to_pow_g1*n1mRsq+t_to_pow_g0*saq) +
-//       log(g_0*(1-t[i])+g_1*t[i]) +
-//       -(alpha+beta)*log(a*t_to_pow_g0+onemt_to_pow_g1) +
-//       power_t*log(t[i]) +
-//       power_1mt*log(1-t[i]);
-//   }
-//   if(par->log_eval==0){
-//     for(int i=0; i<n; i++) t[i] = exp(t[i]);
-//   }
-//   return;
-// }
-
-//Something is not right, getting integrals greater than 1
-//HERE
 double get_log_bf_scaled_beta(struct model_struct * model){
   double out = 0.00;
 

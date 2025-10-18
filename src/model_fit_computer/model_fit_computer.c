@@ -85,12 +85,15 @@ void model_fit_computer(model_t * mod){
   mod->residual_sd = sqrt((data.intercept_only_model_SSE-ws.SST)/((double)(data.num_obs - (int)ws.rank_lapack)));
   mod->rank = (int)ws.rank_lapack;
 
-  //we should call a function for getting the model space prior -- this could be a call to a global that is made by a model space prior constructor with a big switch
+  
   mod->log_prior = model_space_prior.log_prior_models[mod->size - data.base_model_size];
-  // //we should call a function for getting the log_BF0 (and think about base model) -- this needs to have its own workspace and a big switch -- probably should be a separate struct and have its own header and c file (or lots of them), to keep things neat and organized -- will probably need to use GSL for integration? -- probably need to BF options flags in here
+  
   mod->log_BF0 = get_log_bf(mod);
-  // //we need to finish with the coefs and such
-  // //from here, these are coefficient MLEs and associated standard deviations, correct by multiplying by shrinkage factor later
+  
+  mod->shrinkage_factor = get_shrinkage_factor(mod);
+  
+  //we need to finish with the coefs and such
+  
 
 
 

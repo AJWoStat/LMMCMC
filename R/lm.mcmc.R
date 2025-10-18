@@ -58,6 +58,7 @@ lm.mcmc = function(
   out$rank = result$rank
   out$R2 = result$Rsq
   out$mse = result$residual_sd^2
+  out$shrinkage_factor = result$shrinkage_factor
   out$freq = result$mcmc_count
   out$mcmc_id = result$mcmc_id+1
   out$mcmc_draws = result$mcmc_draws+1

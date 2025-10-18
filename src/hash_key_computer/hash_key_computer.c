@@ -1,5 +1,7 @@
 #include"hash_key_computer.h"
 
+//note use of rand() from stdlib to keep hash/rehash away from RNG from R
+
 static struct hash_key_parameters_struct * hash_key_par = NULL;
 
 void hash_key_parameters_constructor(const int vec_mult_length){

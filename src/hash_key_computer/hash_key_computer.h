@@ -7,6 +7,8 @@
 #include <time.h>
 #include "R_ext/Print.h"
 
+//note use of rand() from stdlib to keep hash/rehash away from RNG from R
+
 struct hash_key_parameters_struct{
   int shift_right_xor[4];
   uint64_t times_replace[3];

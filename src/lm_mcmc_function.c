@@ -28,7 +28,6 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   SEXP n_thin_R = PROTECT(duplicate(n_thin));
   SEXP n_draws_R = PROTECT(duplicate(n_draws));
   SEXP proposal_probs_R = PROTECT(duplicate(proposal_probs));
-  // SEXP seed_R = PROTECT(duplicate(seed));
   SEXP hash_table_length_R = PROTECT(duplicate(hash_table_length));
   SEXP linked_list_length_R = PROTECT(duplicate(linked_list_length));
   SEXP max_load_factor_R = PROTECT(duplicate(max_load_factor));
@@ -81,8 +80,11 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   vmaxset(vmax); //just trying to get away from the R_alloc allocation for family_in
   free(coef_params_in); msp_params_in=NULL;
   
-  // log_bf_constructor(); //not yet
+  // setting log BF computer
   log_bf_integrator_struct_constructor(&data, &coef_prior);
+  
+  // setting shrinkage factor computer
+  shrinkage_factor_integrator_struct_constructor(&data, &coef_prior);
   
   //setting model fit
   model_fit_workspace_constructor();
@@ -90,9 +92,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   //setting hash key
   hash_key_parameters_constructor(data.bitrep_length);
 
-  //setting rng
-  // rng_constructor((unsigned long int) INTEGER(seed)[0]); //in mcmc_proposals
-
+  
   //setting starting model
   int length = Rf_length(start_model_indices_R) + 1;
   int inc_coef = INTEGER(include_coef_R)[0];
@@ -131,7 +131,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   hash_table = hash_table_constructor(ht_length, ll_length, mlf);
 
   //UNPROTECTING THE PROTECTED, the information is all on the C side now.
-  UNPROTECT(17);
+  UNPROTECT(20);
 
   // do the mcmc
   mcmc_all_draws(&hash_table);
@@ -139,23 +139,22 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   // release the memory that we can
   data_store_destructor();
   model_space_prior_destructor();
-  // log_bf_destructor(); //not yet
+  log_bf_integrator_struct_destructor();
+  shrinkage_factor_integrator_struct_destructor();
   model_fit_workspace_destructor();
   hash_key_parameters_destructor();
-  // rng_destructor();//in mcmc_proposals
 
-  /* for now, this is what I want to output
-   * models, size, rank, Rsq, log_prior, log_BF0, log_post_renormalization, mcmc_count, post_sampling, mcmc_id, mcmc_list
-   */
+  //output
   int out_elts_length = hash_table->hash_table_total_insertions;
-  SEXP out = PROTECT(allocVector(VECSXP, 12));
-  SEXP out_names = PROTECT(allocVector(STRSXP, 12));
+  SEXP out = PROTECT(allocVector(VECSXP, 13));
+  SEXP out_names = PROTECT(allocVector(STRSXP, 13));
   SEXP models = PROTECT(allocVector(VECSXP, out_elts_length));
   SEXP size = PROTECT(allocVector(INTSXP, out_elts_length));
   SEXP rank = PROTECT(allocVector(INTSXP, out_elts_length));
   SEXP mcmc_count = PROTECT(allocVector(INTSXP, out_elts_length));
   SEXP Rsq = PROTECT(allocVector(REALSXP, out_elts_length));
   SEXP residual_sd = PROTECT(allocVector(REALSXP, out_elts_length));
+  SEXP shrinkage_factor = PROTECT(allocVector(REALSXP, out_elts_length));
   SEXP log_prior = PROTECT(allocVector(REALSXP, out_elts_length));
   SEXP log_BF0 = PROTECT(allocVector(REALSXP, out_elts_length));
   SEXP log_post_renormalization = PROTECT(allocVector(REALSXP, out_elts_length));
@@ -181,6 +180,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
         INTEGER(mcmc_id)[location] = hash_table->hash_table[loc+i].mcmc_id;
         INTEGER(mcmc_count)[location] = hash_table->hash_table[loc+i].mcmc_count;
         REAL(residual_sd)[location] = hash_table->hash_table[loc+i].mod->residual_sd;
+        REAL(shrinkage_factor)[location] = hash_table->hash_table[loc+i].mod->shrinkage_factor;
         REAL(Rsq)[location] = hash_table->hash_table[loc+i].mod->Rsq;
         REAL(log_prior)[location] = hash_table->hash_table[loc+i].mod->log_prior;
         REAL(log_BF0)[location] = hash_table->hash_table[loc+i].mod->log_BF0;
@@ -233,21 +233,24 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
 
   SET_VECTOR_ELT(out, 8, residual_sd);
   SET_STRING_ELT(out_names, 8, mkChar("residual_sd"));
+  
+  SET_VECTOR_ELT(out, 9, shrinkage_factor);
+  SET_STRING_ELT(out_names, 9, mkChar("shrinkage_factor"));
 
-  SET_VECTOR_ELT(out, 9, mcmc_id);
-  SET_STRING_ELT(out_names, 9, mkChar("mcmc_id"));
+  SET_VECTOR_ELT(out, 10, mcmc_id);
+  SET_STRING_ELT(out_names, 10, mkChar("mcmc_id"));
 
-  SET_VECTOR_ELT(out, 10, mcmc_count);
-  SET_STRING_ELT(out_names, 10, mkChar("mcmc_count"));
+  SET_VECTOR_ELT(out, 11, mcmc_count);
+  SET_STRING_ELT(out_names, 11, mkChar("mcmc_count"));
 
-  SET_VECTOR_ELT(out, 11, mcmc_draws);
-  SET_STRING_ELT(out_names, 11, mkChar("mcmc_draws"));
+  SET_VECTOR_ELT(out, 12, mcmc_draws);
+  SET_STRING_ELT(out_names, 12, mkChar("mcmc_draws"));
 
   Rf_setAttrib(out, R_NamesSymbol, out_names);
 
   PutRNGstate();
 
-  UNPROTECT(17);
+  UNPROTECT(15);
   return(out);
 
 }

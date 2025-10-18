@@ -39,6 +39,7 @@ A list in the style of BAS. All but \code{mcmc.draws} share a common index.
 \item{rank}{(vector) Model design matrix rank.}
 \item{R2}{(vector) Model $R^2$.}
 \item{mse}{(vector) Model response variance.}
+\item{shrinkage_factor}{(vector) Model shrinkage factor.}
 \item{freq}{(vector) Model MCMC frequency.}
 \item{mcmc.id}{(vector) Model ID in the sequence of MCMC draws. Unsampled models get the common value of 0.}
 \item{mcmc.draws}{(vector) Sequence of integers representing the models sampled. Each element is a non-zero element of mcmc.id}

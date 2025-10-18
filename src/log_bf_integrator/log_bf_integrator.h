@@ -8,6 +8,7 @@
 #include"R.h"
 #include"Rmath.h"
 #include"R_ext/Applic.h"
+#include"../data_store_struct/data_store_struct.h"
 #include"../cubic_root_finder/cubic_root_finder.h"
 #include"../coef_prior_struct/coef_prior_struct.h"
 #include"../model_struct/model_struct.h"

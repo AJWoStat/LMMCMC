@@ -43,6 +43,7 @@ model_t * model_constructor(const int bitrep_length, const int include_coef_esti
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
+  mod->shrinkage_factor = 1.00;
   mod->bitrep_length = bitrep_length;
   for(int i=0; i<mod->bitrep_length; i++) mod->bitrep[i]=0;
   model_alloc_coef_estimates_and_vcov(mod, include_coef_estimates, include_coef_vcov);
@@ -63,6 +64,7 @@ void model_copy(model_t * mod, const model_t * mod_in){
   mod->log_prior = mod_in->log_prior;
   mod->log_BF0 = mod_in->log_BF0;
   mod->residual_sd = mod_in->residual_sd;
+  mod->shrinkage_factor = mod_in->shrinkage_factor;
   model_realloc_coef_estimates_and_vcov(mod, mod_in->coef == NULL ? 0 : 1, mod_in->coef_vcov_upper == NULL ? 0 : 1);
   if(mod_in->coef != NULL){
     for(int i=0; i<mod->size; i++){mod->coef[i] = mod_in->coef[i]; mod->coef_sd[i] = mod_in->coef_sd[i];}
@@ -122,6 +124,7 @@ int model_is_equal(const model_t * mod_1, const model_t * mod_2, int only_bitrep
     if(double_is_equal(mod_1->log_prior, mod_2->log_prior)==0) return(0);
     if(double_is_equal(mod_1->log_BF0, mod_2->log_BF0)==0) return(0);
     if(double_is_equal(mod_1->residual_sd, mod_2->residual_sd)==0) return(0);
+    if(double_is_equal(mod_1->shrinkage_factor, mod_2->shrinkage_factor)==0) return(0);
     if(mod_1->coef == NULL && mod_2->coef != NULL) return(0);
     if(mod_1->coef != NULL && mod_2->coef == NULL) return(0);
     if(mod_1->coef_sd == NULL && mod_2->coef_sd != NULL) return(0);
@@ -149,6 +152,7 @@ void model_bitrep_replacement(model_t * mod, const uint32_t * bitrep, const int 
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
+  mod->shrinkage_factor = 1.00;
   mod->hash_key = hash_key_computer(mod->bitrep, mod->bitrep_length);
   return;
 }
@@ -174,6 +178,7 @@ void model_bit_flips(model_t * mod, const int * bits, const int bits_length){
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
+  mod->shrinkage_factor = 1.00;
   mod->hash_key = hash_key_computer(mod->bitrep, mod->bitrep_length);
   return;
 }
@@ -187,6 +192,7 @@ void model_print(const model_t * mod){
   Rprintf("hash_key: %u\n", mod->hash_key);
   Rprintf("Rsq: %f\n", mod->Rsq);
   Rprintf("residual_sd: %f\n", mod->residual_sd);
+  Rprintf("shrinkage_factor: %f\n", mod->shrinkage_factor);
   Rprintf("log_prior: %f\n", mod->log_prior);
   Rprintf("log_BF0: %f\n", mod->log_BF0);
   if(mod->coef != NULL){

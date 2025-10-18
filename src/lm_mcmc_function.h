@@ -18,15 +18,7 @@
 #include "model_space_prior/model_space_prior.h"
 #include "log_bf_integrator/log_bf_integrator.h"
 #include "coef_prior_struct/coef_prior_struct.h"
-// #include "data_store_struct.h"
-// #include "model_struct.h"
-// #include "mcmc_struct.h"
-// #include "hash_table_struct.h"
-// #include "hash_key_computer.h"
-// #include "int_bit_converters.h"
-// #include "model_fit_computer.h"
-// #include "model_space_prior.h"
-// #include "log_bf_computer.h"
+#include "shrinkage_factor_integrator/shrinkage_factor_integrator.h"
 
 extern SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_indices, //data info
               // SEXP bf_type, SEXP bf_params, SEXP scale_by_rank,  //coefficient prior info - for later

@@ -13,7 +13,7 @@
 struct model_struct{
   uint32_t hash_key; // need to compute in bitrep or intarray constructors or when bitrep_replacement or bit_flips is called
   int size, rank; // needed, rank from fit function
-  double Rsq, log_prior, log_BF0, residual_sd; //residual_sd computed as root mean square of residuals where the denominator is the degrees of freedom data->num_obs-mod->rank. For models with rank=num_obs the residual sd is reported as nan
+  double Rsq, log_prior, log_BF0, residual_sd, shrinkage_factor; //residual_sd computed as root mean square of residuals where the denominator is the degrees of freedom data->num_obs-mod->rank. For models with rank=num_obs the residual sd is reported as nan
   double *coef, *coef_sd, *coef_vcov_upper;
 
   int bitrep_length; // all functions assume that this is constant over the set of instances

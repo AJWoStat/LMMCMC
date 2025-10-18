@@ -10,6 +10,7 @@
 #include "../data_store_struct/data_store_struct.h"
 #include "../model_space_prior/model_space_prior.h"
 #include "../log_bf_integrator/log_bf_integrator.h"
+#include "../shrinkage_factor_integrator/shrinkage_factor_integrator.h"
 
 
 struct model_fit_workspace_struct{
