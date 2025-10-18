@@ -1,4 +1,7 @@
 \documentclass[12pt]{article}
+
+%\VignetteIndexEntry{Using LMMCMC}
+
 \usepackage[margin=1in]{geometry}
 
 \usepackage{hyperref}
@@ -21,7 +24,6 @@ n = 200
 p = 40
 pT = 15
 snr=4
-set.seed(12345)
 X = matrix(rnorm(n*p), n, p)
 y = rnorm(n) + 1 + X%*%rep(c(1,0), times=c(pT, p-pT))*sqrt(snr/pT)
 bb_1_p <- lm.mcmc(y, X, model.prior = beta_binomial_complexity.prior(),

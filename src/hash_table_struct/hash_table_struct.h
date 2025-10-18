@@ -6,15 +6,12 @@
 #include<stdlib.h>
 #include<tgmath.h>
 #include"../model_struct/model_struct.h"
-// #include"model_struct.h"
 #include"../model_fit_computer/model_fit_computer.h"
-// #include"model_fit_computer.h"
 #include"../int_bit_converters/int_bit_converters.h"
-// #include"int_bit_converters.h"
 #include"../get_a_prime/get_a_prime.h"
-// #include"get_a_prime.h"
 #include"../hash_key_computer/hash_key_computer.h"
-// #include"hash_key_computer.h"
+#include"R_ext/Print.h"
+
 
 struct linked_list_element_struct{
   int mcmc_count;

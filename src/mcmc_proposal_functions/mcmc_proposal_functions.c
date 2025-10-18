@@ -1,17 +1,5 @@
 #include "mcmc_proposal_functions.h"
 
-// static gsl_rng * rng;
-//
-// void rng_constructor(unsigned long int seed){
-//   rng = gsl_rng_alloc(gsl_rng_mt19937);
-//   gsl_rng_set(rng, seed);
-//   return;
-// }
-// void rng_destructor(){
-//   gsl_rng_free(rng); rng = NULL;
-//   return;
-// }
-
 double draw_unif_continuous(){
   return(runif(0, 1));
 }
