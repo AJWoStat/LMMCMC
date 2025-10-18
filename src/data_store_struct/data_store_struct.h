@@ -1,6 +1,7 @@
 #ifndef DATA_STORE_STRUCT_H
 #define DATA_STORE_STRUCT_H
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "../int_bit_converters/int_bit_converters.h"
