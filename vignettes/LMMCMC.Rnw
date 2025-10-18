@@ -8,7 +8,7 @@
 
 \title{LMMCMC: MCMC for Gaussian Linear Models}
 \author{Andrew Womack\\\href{mailto:womack.andrew@gmail.com}{womack.andrew@gmail.com}}
-\date{September 25, 2025}
+\date{October 18, 2025}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
