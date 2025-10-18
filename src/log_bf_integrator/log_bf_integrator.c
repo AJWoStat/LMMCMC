@@ -123,6 +123,8 @@ double get_log_bf(struct model_struct * model){
   log_bf_integrator.r = (double)(model->rank);
   log_bf_integrator.q = log_bf_integrator.eff == 1 ? log_bf_integrator.r : 1.00;
   log_bf_integrator.Rsq = 1.00-(1.00 - model->Rsq*data.intercept_only_model_SSE)/data.base_model_SSE;
+  log_bf_integrator.Rsq = fmin(log_bf_integrator.Rsq, 1.00);
+  log_bf_integrator.Rsq = fmax(log_bf_integrator.Rsq, 0.00);
   double out = (*get_log_bf_prior_specific)(model);
   return(out);
 }
