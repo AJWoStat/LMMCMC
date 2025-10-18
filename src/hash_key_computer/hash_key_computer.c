@@ -55,7 +55,7 @@ uint32_t hash_key_computer(const uint32_t * u, const int u_length){
    * by Mikkel Thorup
    */
   if(u_length != hash_key_par->vec_mult_length){
-    printf("Bad match, hashkey mutiplier parameter length does not match input bitrep length. Hash key 0 returned.");
+    Rprintf("Bad match, hashkey mutiplier parameter length does not match input bitrep length. Hash key 0 returned.");
     return(0);
   }
   uint64_t out = hash_key_par->vec_add;
@@ -71,13 +71,13 @@ uint32_t hash_key_computer(const uint32_t * u, const int u_length){
 
 
 void hash_key_parameters_print(){
-  printf("Hash struct:\n Hash key xor: ");
-  for(int i=0; i<4; i++) printf("%u ", hash_key_par->shift_right_xor[i]);
-  printf("\nHash struct:\n Hash key times replace: ");
-  for(int i=0; i<3; i++) printf("%016llx ", hash_key_par->times_replace[i]);
-  printf("\nHash struct:\n Hash key add: %016llx\n", hash_key_par->vec_add);
-  printf("Hash struct:\n Hash key vec mult: ");
-  for(int i=0; i<hash_key_par->vec_mult_length; i++) printf("%016llx ", hash_key_par->vec_mult[i]);
-  printf("\n");
+  Rprintf("Hash struct:\n Hash key xor: ");
+  for(int i=0; i<4; i++) Rprintf("%u ", hash_key_par->shift_right_xor[i]);
+  Rprintf("\nHash struct:\n Hash key times replace: ");
+  for(int i=0; i<3; i++) Rprintf("%016llx ", hash_key_par->times_replace[i]);
+  Rprintf("\nHash struct:\n Hash key add: %016llx\n", hash_key_par->vec_add);
+  Rprintf("Hash struct:\n Hash key vec mult: ");
+  for(int i=0; i<hash_key_par->vec_mult_length; i++) Rprintf("%016llx ", hash_key_par->vec_mult[i]);
+  Rprintf("\n");
   
 }

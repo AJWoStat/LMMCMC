@@ -1,7 +1,6 @@
 #ifndef LM_MCMC_FUNCTION_H
 #define LM_MCMC_FUNCTION_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>

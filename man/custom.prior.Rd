@@ -2,11 +2,13 @@
 \alias{custom.prior}
 \title{Custom Model Space Prior}
 \usage{
-  custom.prior(log.complexity.prior, family="Custom")
+  custom.prior(log.complexity.prior, family = "custom", trunc = NA)
 }
 \arguments{
   \item{log.complexity.prior}{Vector of logarithms of probabilities on model complexity. Should have length p+1 where p is the number of predictors in the full model. Index k+1 is the logarithm of the probability that k predictors are included in the model.}
   \item{family}{A string representing the name of the prior.}
+  \item{trunc}{Models with more than \code{trunc} predictors are assigned 0 prior probability. 
+  Must be a positive integer or \code{NA}.}
 }
 \value{
   Returns an object of class "prior" with the following components.

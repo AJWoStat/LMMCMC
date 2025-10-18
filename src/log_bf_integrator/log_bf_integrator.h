@@ -1,7 +1,6 @@
 #ifndef LOG_BF_INTEGRATOR_H
 #define LOG_BF_INTEGRATOR_H
 
-#include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
 #include<float.h>

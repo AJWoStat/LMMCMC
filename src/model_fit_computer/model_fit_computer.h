@@ -1,23 +1,15 @@
 #ifndef MODEL_FIT_COMPUTER_H
 #define MODEL_FIT_COMPUTER_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <R_ext/Lapack.h>
 #include <R_ext/BLAS.h>
-// #include "lapack.h"
-// #include "cblas.h"
 #include "../model_struct/model_struct.h"
 #include "../int_bit_converters/int_bit_converters.h"
 #include "../data_store_struct/data_store_struct.h"
 #include "../model_space_prior/model_space_prior.h"
 #include "../log_bf_integrator/log_bf_integrator.h"
-// #include "model_struct.h"
-// #include "int_bit_converters.h"
-// #include "data_store_struct.h"
-// #include "model_space_prior.h"
-// #include "log_bf_computer.h"
 
 
 struct model_fit_workspace_struct{

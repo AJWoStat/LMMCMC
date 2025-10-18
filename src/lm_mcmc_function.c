@@ -245,10 +245,6 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
 
   Rf_setAttrib(out, R_NamesSymbol, out_names);
 
-  // use the following when you want to pause before end and use leaks to check alloc/free
-  // fprintf(stderr, "Press to end.\n");
-  // getchar();
-
   PutRNGstate();
 
   UNPROTECT(17);

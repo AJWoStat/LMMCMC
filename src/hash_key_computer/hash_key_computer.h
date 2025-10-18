@@ -1,11 +1,11 @@
 #ifndef HASH_KEY_COMPUTER_H
 #define HASH_KEY_COMPUTER_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
 #include <time.h>
+#include "R_ext/Print.h"
 
 struct hash_key_parameters_struct{
   int shift_right_xor[4];

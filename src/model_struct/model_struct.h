@@ -1,16 +1,13 @@
 #ifndef MODEL_STRUCT_H
 #define MODEL_STRUCT_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
 #include "../int_bit_converters/int_bit_converters.h"
 #include "../double_is_equal/double_is_equal.h"
 #include "../hash_key_computer/hash_key_computer.h"
-// #include "int_bit_converters.h"
-// #include "double_is_equal.h"
-// #include "hash_key_computer.h"
+#include "R_ext/Print.h"
 
 
 struct model_struct{
