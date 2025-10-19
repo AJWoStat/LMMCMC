@@ -1,6 +1,7 @@
 #include"log_bf_integrator.h"
 
-static struct log_bf_integrator_struct log_bf_integrator;
+// static struct log_bf_integrator_struct log_bf_integrator;
+struct log_bf_integrator_struct log_bf_integrator;
 
 void log_bf_integrator_struct_constructor(struct data_store_struct * data, struct coef_prior_struct * coef_prior)
 {
@@ -17,16 +18,16 @@ void log_bf_integrator_struct_constructor(struct data_store_struct * data, struc
   
   //integrand and get_log_bf functions
   if(strcmp(log_bf_integrator.bf_type, "gamma")==0 || strcmp(log_bf_integrator.bf_type, "zellner-siow")==0){
-    integrand = &log_bf_gamma_integrand; 
+    log_bf_integrand = &log_bf_gamma_integrand; 
     get_log_bf_prior_specific = &get_log_bf_gamma;
   }else if(strcmp(log_bf_integrator.bf_type, "beta-prime")==0 || strcmp(log_bf_integrator.bf_type, "hyper-g")==0){
-    integrand = &log_bf_beta_prime_integrand; 
+    log_bf_integrand = &log_bf_beta_prime_integrand; 
     get_log_bf_prior_specific = &get_log_bf_beta_prime;
   }else if(strcmp(log_bf_integrator.bf_type, "scaled-beta")==0 || strcmp(log_bf_integrator.bf_type, "intrinsic")==0){
-    integrand = &log_bf_scaled_beta_integrand;
+    log_bf_integrand = &log_bf_scaled_beta_integrand;
     get_log_bf_prior_specific = &get_log_bf_scaled_beta;
   }else{
-    integrand = &log_bf_g_prior_integrand;
+    log_bf_integrand = &log_bf_g_prior_integrand;
     get_log_bf_prior_specific = &get_log_bf_g_prior;
   }
   
@@ -132,7 +133,7 @@ double get_log_bf(struct model_struct * model){
 
 double get_log_bf_g_prior(struct model_struct * model){
   double out = 0.00;
-  (*integrand)(&out, 1, log_bf_integrator.ex);
+  (*log_bf_integrand)(&out, 1, log_bf_integrator.ex);
   return(out);
 }
 
@@ -183,10 +184,10 @@ double get_log_bf_gamma(struct model_struct * model){
   log_bf_integrator.max_log_integrand = 0.00;
   double initial_val = log_bf_integrator.t_0;
   log_bf_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, log_bf_integrator.ex);
+  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
   log_bf_integrator.max_log_integrand = initial_val;
   log_bf_integrator.log_eval = 0;
-  Rdqags(*integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
+  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
          &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
          &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
          &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
@@ -279,10 +280,10 @@ double get_log_bf_beta_prime(struct model_struct * model){
   log_bf_integrator.max_log_integrand = 0.00;
   double initial_val = log_bf_integrator.t_0;
   log_bf_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, log_bf_integrator.ex);
+  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
   log_bf_integrator.max_log_integrand = initial_val;
   log_bf_integrator.log_eval = 0;
-  Rdqags(*integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
+  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
          &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
          &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
          &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
@@ -378,10 +379,10 @@ double get_log_bf_scaled_beta(struct model_struct * model){
   log_bf_integrator.max_log_integrand = 0.00;
   double initial_val = log_bf_integrator.t_0;
   log_bf_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, log_bf_integrator.ex);
+  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
   log_bf_integrator.max_log_integrand = initial_val;
   log_bf_integrator.log_eval = 0;
-  Rdqags(*integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
+  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
          &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
          &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
          &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);

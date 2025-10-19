@@ -17,16 +17,16 @@ void shrinkage_factor_integrator_struct_constructor(struct data_store_struct * d
   
   //integrand and get_shrinkage_factor functions
   if(strcmp(shrinkage_factor_integrator.bf_type, "gamma")==0 || strcmp(shrinkage_factor_integrator.bf_type, "zellner-siow")==0){
-    integrand = &shrinkage_factor_gamma_integrand; 
+    shrinkage_factor_integrand = &shrinkage_factor_gamma_integrand; 
     get_shrinkage_factor_prior_specific = &get_shrinkage_factor_gamma;
   }else if(strcmp(shrinkage_factor_integrator.bf_type, "beta-prime")==0 || strcmp(shrinkage_factor_integrator.bf_type, "hyper-g")==0){
-    integrand = &shrinkage_factor_beta_prime_integrand; 
+    shrinkage_factor_integrand = &shrinkage_factor_beta_prime_integrand; 
     get_shrinkage_factor_prior_specific = &get_shrinkage_factor_beta_prime;
   }else if(strcmp(shrinkage_factor_integrator.bf_type, "scaled-beta")==0 || strcmp(shrinkage_factor_integrator.bf_type, "intrinsic")==0){
-    integrand = &shrinkage_factor_scaled_beta_integrand;
+    shrinkage_factor_integrand = &shrinkage_factor_scaled_beta_integrand;
     get_shrinkage_factor_prior_specific = &get_shrinkage_factor_scaled_beta;
   }else{
-    integrand = &shrinkage_factor_g_prior_integrand;
+    shrinkage_factor_integrand = &shrinkage_factor_g_prior_integrand;
     get_shrinkage_factor_prior_specific = &get_shrinkage_factor_g_prior;
   }
   
@@ -123,7 +123,7 @@ double get_shrinkage_factor(struct model_struct * model){
   shrinkage_factor_integrator.r = (double)(model->rank);
   shrinkage_factor_integrator.q = shrinkage_factor_integrator.eff == 1 ? shrinkage_factor_integrator.r : 1.00;
   //HERE is a problem?
-  shrinkage_factor_integrator.Rsq = model->Rsq;//1.00-(1.00 - model->Rsq*data.intercept_only_model_SSE)/data.base_model_SSE;
+  shrinkage_factor_integrator.Rsq = 1.00-(1.00 - model->Rsq)*data.intercept_only_model_SSE/data.base_model_SSE;
   // shrinkage_factor_integrator.Rsq = fmin(shrinkage_factor_integrator.Rsq, 1.00);
   // shrinkage_factor_integrator.Rsq = fmax(shrinkage_factor_integrator.Rsq, 0.00);
   //everything done on log scale and only exponetiated at the end
@@ -133,7 +133,7 @@ double get_shrinkage_factor(struct model_struct * model){
 
 double get_shrinkage_factor_g_prior(struct model_struct * model){
   double out = 0.00;
-  (*integrand)(&out, 1, shrinkage_factor_integrator.ex);
+  (*shrinkage_factor_integrand)(&out, 1, shrinkage_factor_integrator.ex);
   return(out);
 }
 
@@ -142,7 +142,6 @@ void shrinkage_factor_g_prior_integrand(double * t, int n, void * ex)//actually 
   //note use of r and not p
   struct shrinkage_factor_integrator_struct * par = (struct shrinkage_factor_integrator_struct*) ex;
   double scale_times_q_over_n = par->scale * par->q / par->n ;
-  // Rprintf("g-prior log shrinkage %f\n", -log1p(scale_times_q_over_n));
   t[0] = -log1p(scale_times_q_over_n) + 0.5*(par->n - par->r)*log1p(scale_times_q_over_n) +
     -0.5*(par->n - par->r_0)*log1p(scale_times_q_over_n - par->Rsq) +
     0.5*(par->r - par->r_0)*log(scale_times_q_over_n);
@@ -187,10 +186,10 @@ double get_shrinkage_factor_gamma(struct model_struct * model){
   shrinkage_factor_integrator.max_log_integrand = 0.00;
   double initial_val = shrinkage_factor_integrator.t_0;
   shrinkage_factor_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
+  (*shrinkage_factor_integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
   shrinkage_factor_integrator.max_log_integrand = initial_val;
   shrinkage_factor_integrator.log_eval = 0;
-  Rdqags(*integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
+  Rdqags(*shrinkage_factor_integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
          &shrinkage_factor_integrator.epsabs, &shrinkage_factor_integrator.epsrel, &shrinkage_factor_integrator.result, &shrinkage_factor_integrator.abserr,
          &shrinkage_factor_integrator.neval, &shrinkage_factor_integrator.ier, &shrinkage_factor_integrator.limit, &shrinkage_factor_integrator.lenw,
          &shrinkage_factor_integrator.last, shrinkage_factor_integrator.iwork, shrinkage_factor_integrator.work);
@@ -287,10 +286,10 @@ double get_shrinkage_factor_beta_prime(struct model_struct * model){
   shrinkage_factor_integrator.max_log_integrand = 0.00;
   double initial_val = shrinkage_factor_integrator.t_0;
   shrinkage_factor_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
+  (*shrinkage_factor_integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
   shrinkage_factor_integrator.max_log_integrand = initial_val;
   shrinkage_factor_integrator.log_eval = 0;
-  Rdqags(*integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
+  Rdqags(*shrinkage_factor_integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
          &shrinkage_factor_integrator.epsabs, &shrinkage_factor_integrator.epsrel, &shrinkage_factor_integrator.result, &shrinkage_factor_integrator.abserr,
          &shrinkage_factor_integrator.neval, &shrinkage_factor_integrator.ier, &shrinkage_factor_integrator.limit, &shrinkage_factor_integrator.lenw,
          &shrinkage_factor_integrator.last, shrinkage_factor_integrator.iwork, shrinkage_factor_integrator.work);
@@ -347,56 +346,56 @@ void shrinkage_factor_beta_prime_integrand(double * t, int n, void * ex)
 double get_shrinkage_factor_scaled_beta(struct model_struct * model){
   double out = 0.00;
 
-  shrinkage_factor_integrator.gamma_0 = 2.00/(2.00*shrinkage_factor_integrator.shape_0 + shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0) + 1.00;//shrinkage_factor_integrator.shape_0>0.50 ? 1.00 : 2.00/shrinkage_factor_integrator.shape_0;//4.00/(2.00*shrinkage_factor_integrator.shape_0 + shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0);//
-  shrinkage_factor_integrator.gamma_1 = 1.00/shrinkage_factor_integrator.shape_1 + 1.00;//shrinkage_factor_integrator.shape_1>1.00 ? 1.00 : 2.00/shrinkage_factor_integrator.shape_1;//2.00/shrinkage_factor_integrator.shape_1;//
-  //note using ranks instead of sizes
-  double rat = (shrinkage_factor_integrator.gamma_0*(1.00-shrinkage_factor_integrator.t_0) + shrinkage_factor_integrator.gamma_1*shrinkage_factor_integrator.t_0)/(shrinkage_factor_integrator.t_0*(1.00-shrinkage_factor_integrator.t_0));
-  shrinkage_factor_integrator.A[2] = 0.5*rat/shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q*shrinkage_factor_integrator.n*((shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0)-shrinkage_factor_integrator.Rsq*(shrinkage_factor_integrator.n-shrinkage_factor_integrator.r_0));
-  shrinkage_factor_integrator.A[0] = 0.5*rat*shrinkage_factor_integrator.n*shrinkage_factor_integrator.n*((shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0)*(1.00-shrinkage_factor_integrator.Rsq));
-  shrinkage_factor_integrator.A[1] = -shrinkage_factor_integrator.A[0]/shrinkage_factor_integrator.scale + shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.scale;
-  shrinkage_factor_integrator.B[2] = shrinkage_factor_integrator.q*shrinkage_factor_integrator.q;
-  shrinkage_factor_integrator.B[1] = shrinkage_factor_integrator.q*shrinkage_factor_integrator.n*(2.00-shrinkage_factor_integrator.Rsq);
-  shrinkage_factor_integrator.B[0] = shrinkage_factor_integrator.n*shrinkage_factor_integrator.n*(1.00-shrinkage_factor_integrator.Rsq);
-  double num_add = (shrinkage_factor_integrator.gamma_1-shrinkage_factor_integrator.gamma_0)/(shrinkage_factor_integrator.gamma_0*(1.00-shrinkage_factor_integrator.t_0) + shrinkage_factor_integrator.gamma_1*shrinkage_factor_integrator.t_0) - 1.00/shrinkage_factor_integrator.t_0 + 1.00/(1.00-shrinkage_factor_integrator.t_0);
-  shrinkage_factor_integrator.C[1] = -rat/shrinkage_factor_integrator.scale*(shrinkage_factor_integrator.shape_0+shrinkage_factor_integrator.shape_1);
-  shrinkage_factor_integrator.C[0] = shrinkage_factor_integrator.shape_0*rat + num_add;
-  shrinkage_factor_integrator.D[1] = 0.00;
-  shrinkage_factor_integrator.D[0] = 1.00;
-  shrinkage_factor_integrator.A[2] -= rat*shrinkage_factor_integrator.q*(shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q+shrinkage_factor_integrator.n)/shrinkage_factor_integrator.scale;
-  shrinkage_factor_integrator.A[1] -= rat*shrinkage_factor_integrator.n*(1.00-shrinkage_factor_integrator.Rsq)*(shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q+shrinkage_factor_integrator.n)/shrinkage_factor_integrator.scale;
-  shrinkage_factor_integrator.C[1] += rat/shrinkage_factor_integrator.scale;
-  shrinkage_factor_integrator.poly_coef[0] = shrinkage_factor_integrator.A[0]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[0]*shrinkage_factor_integrator.C[0];
-  shrinkage_factor_integrator.poly_coef[1] = shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[0]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[0]*shrinkage_factor_integrator.C[1];
-  shrinkage_factor_integrator.poly_coef[2] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[1];
-  shrinkage_factor_integrator.poly_coef[3] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[1];
-  if(fabs(shrinkage_factor_integrator.poly_coef[3])>DBL_EPSILON*100){
-    cubic_root_finder(shrinkage_factor_integrator.poly_coef, shrinkage_factor_integrator.poly_root);
-    for(int i=0; i<3; i++){
-      if(shrinkage_factor_integrator.poly_root[i]>0 && 
-         fabs(shrinkage_factor_integrator.poly_root[i+3])<shrinkage_factor_integrator.poly_root_epsilon){
-        shrinkage_factor_integrator.wat0 = shrinkage_factor_integrator.poly_root[i];
-        break;
-      }
-    }
-  }else{
-    shrinkage_factor_integrator.wat0 = (-shrinkage_factor_integrator.poly_coef[1] + sqrt(shrinkage_factor_integrator.poly_coef[1]*shrinkage_factor_integrator.poly_coef[1]-4.00*shrinkage_factor_integrator.poly_coef[2]*shrinkage_factor_integrator.poly_coef[0]))/(2.00*shrinkage_factor_integrator.poly_coef[2]);
-  }
-  //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
-  //we should probably do a check on INFO here
-
-  double wos = shrinkage_factor_integrator.wat0/shrinkage_factor_integrator.scale;
-  // atg0/(atg0+1mtg1) = wos;
-  // atg0*(1-wos) = 1mtg1*wos;
-  // a = 1mtg1/tg0*wos/(1-wos);
-  shrinkage_factor_integrator.a = wos/(1.00-wos)*exp(logspace_add(log1p(-shrinkage_factor_integrator.t_0)*shrinkage_factor_integrator.gamma_1, log(shrinkage_factor_integrator.t_0)*shrinkage_factor_integrator.gamma_0));
+  // shrinkage_factor_integrator.gamma_0 = 2.00/(2.00*shrinkage_factor_integrator.shape_0 + shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0) + 1.00;//shrinkage_factor_integrator.shape_0>0.50 ? 1.00 : 2.00/shrinkage_factor_integrator.shape_0;//4.00/(2.00*shrinkage_factor_integrator.shape_0 + shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0);//
+  // shrinkage_factor_integrator.gamma_1 = 1.00/shrinkage_factor_integrator.shape_1 + 1.00;//shrinkage_factor_integrator.shape_1>1.00 ? 1.00 : 2.00/shrinkage_factor_integrator.shape_1;//2.00/shrinkage_factor_integrator.shape_1;//
+  // //note using ranks instead of sizes
+  // double rat = (shrinkage_factor_integrator.gamma_0*(1.00-shrinkage_factor_integrator.t_0) + shrinkage_factor_integrator.gamma_1*shrinkage_factor_integrator.t_0)/(shrinkage_factor_integrator.t_0*(1.00-shrinkage_factor_integrator.t_0));
+  // shrinkage_factor_integrator.A[2] = 0.5*rat/shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q*shrinkage_factor_integrator.n*((shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0)-shrinkage_factor_integrator.Rsq*(shrinkage_factor_integrator.n-shrinkage_factor_integrator.r_0));
+  // shrinkage_factor_integrator.A[0] = 0.5*rat*shrinkage_factor_integrator.n*shrinkage_factor_integrator.n*((shrinkage_factor_integrator.r-shrinkage_factor_integrator.r_0)*(1.00-shrinkage_factor_integrator.Rsq));
+  // shrinkage_factor_integrator.A[1] = -shrinkage_factor_integrator.A[0]/shrinkage_factor_integrator.scale + shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.scale;
+  // shrinkage_factor_integrator.B[2] = shrinkage_factor_integrator.q*shrinkage_factor_integrator.q;
+  // shrinkage_factor_integrator.B[1] = shrinkage_factor_integrator.q*shrinkage_factor_integrator.n*(2.00-shrinkage_factor_integrator.Rsq);
+  // shrinkage_factor_integrator.B[0] = shrinkage_factor_integrator.n*shrinkage_factor_integrator.n*(1.00-shrinkage_factor_integrator.Rsq);
+  // double num_add = (shrinkage_factor_integrator.gamma_1-shrinkage_factor_integrator.gamma_0)/(shrinkage_factor_integrator.gamma_0*(1.00-shrinkage_factor_integrator.t_0) + shrinkage_factor_integrator.gamma_1*shrinkage_factor_integrator.t_0) - 1.00/shrinkage_factor_integrator.t_0 + 1.00/(1.00-shrinkage_factor_integrator.t_0);
+  // shrinkage_factor_integrator.C[1] = -rat/shrinkage_factor_integrator.scale*(shrinkage_factor_integrator.shape_0+shrinkage_factor_integrator.shape_1);
+  // shrinkage_factor_integrator.C[0] = shrinkage_factor_integrator.shape_0*rat + num_add;
+  // shrinkage_factor_integrator.D[1] = 0.00;
+  // shrinkage_factor_integrator.D[0] = 1.00;
+  // shrinkage_factor_integrator.A[2] -= rat*shrinkage_factor_integrator.q*(shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q+shrinkage_factor_integrator.n)/shrinkage_factor_integrator.scale;
+  // shrinkage_factor_integrator.A[1] -= rat*shrinkage_factor_integrator.n*(1.00-shrinkage_factor_integrator.Rsq)*(shrinkage_factor_integrator.scale*shrinkage_factor_integrator.q+shrinkage_factor_integrator.n)/shrinkage_factor_integrator.scale;
+  // shrinkage_factor_integrator.C[1] += rat/shrinkage_factor_integrator.scale;
+  // shrinkage_factor_integrator.poly_coef[0] = shrinkage_factor_integrator.A[0]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[0]*shrinkage_factor_integrator.C[0];
+  // shrinkage_factor_integrator.poly_coef[1] = shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[0]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[0]*shrinkage_factor_integrator.C[1];
+  // shrinkage_factor_integrator.poly_coef[2] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[1];
+  // shrinkage_factor_integrator.poly_coef[3] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[1];
+  // if(fabs(shrinkage_factor_integrator.poly_coef[3])>DBL_EPSILON*100){
+  //   cubic_root_finder(shrinkage_factor_integrator.poly_coef, shrinkage_factor_integrator.poly_root);
+  //   for(int i=0; i<3; i++){
+  //     if(shrinkage_factor_integrator.poly_root[i]>0 && 
+  //        fabs(shrinkage_factor_integrator.poly_root[i+3])<shrinkage_factor_integrator.poly_root_epsilon){
+  //       shrinkage_factor_integrator.wat0 = shrinkage_factor_integrator.poly_root[i];
+  //       break;
+  //     }
+  //   }
+  // }else{
+  //   shrinkage_factor_integrator.wat0 = (-shrinkage_factor_integrator.poly_coef[1] + sqrt(shrinkage_factor_integrator.poly_coef[1]*shrinkage_factor_integrator.poly_coef[1]-4.00*shrinkage_factor_integrator.poly_coef[2]*shrinkage_factor_integrator.poly_coef[0]))/(2.00*shrinkage_factor_integrator.poly_coef[2]);
+  // }
+  // //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
+  // //we should probably do a check on INFO here
+  // 
+  // double wos = shrinkage_factor_integrator.wat0/shrinkage_factor_integrator.scale;
+  // // atg0/(atg0+1mtg1) = wos;
+  // // atg0*(1-wos) = 1mtg1*wos;
+  // // a = 1mtg1/tg0*wos/(1-wos);
+  shrinkage_factor_integrator.a = log_bf_integrator.a;//wos/(1.00-wos)*exp(logspace_add(log1p(-shrinkage_factor_integrator.t_0)*shrinkage_factor_integrator.gamma_1, log(shrinkage_factor_integrator.t_0)*shrinkage_factor_integrator.gamma_0));
   
-  shrinkage_factor_integrator.max_log_integrand = 0.00;
-  double initial_val = shrinkage_factor_integrator.t_0;
-  shrinkage_factor_integrator.log_eval = 1;
-  (*integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
-  shrinkage_factor_integrator.max_log_integrand = initial_val;
+  shrinkage_factor_integrator.max_log_integrand = log_bf_integrator.max_log_integrand;//0.00;
+  // double initial_val = shrinkage_factor_integrator.t_0;
+  // shrinkage_factor_integrator.log_eval = 1;
+  // (*shrinkage_factor_integrand)(&initial_val, 1, shrinkage_factor_integrator.ex);
+  // shrinkage_factor_integrator.max_log_integrand = initial_val;
   shrinkage_factor_integrator.log_eval = 0;
-  Rdqags(*integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
+  Rdqags(*shrinkage_factor_integrand, shrinkage_factor_integrator.ex, &shrinkage_factor_integrator.lower, &shrinkage_factor_integrator.upper,
          &shrinkage_factor_integrator.epsabs, &shrinkage_factor_integrator.epsrel, &shrinkage_factor_integrator.result, &shrinkage_factor_integrator.abserr,
          &shrinkage_factor_integrator.neval, &shrinkage_factor_integrator.ier, &shrinkage_factor_integrator.limit, &shrinkage_factor_integrator.lenw,
          &shrinkage_factor_integrator.last, shrinkage_factor_integrator.iwork, shrinkage_factor_integrator.work);
@@ -410,49 +409,55 @@ double get_shrinkage_factor_scaled_beta(struct model_struct * model){
 void shrinkage_factor_scaled_beta_integrand(double * t, int n, void * ex)
 {
   struct shrinkage_factor_integrator_struct * par = (struct shrinkage_factor_integrator_struct*) ex;
-  double n_obs = par->n;
-  double log_n = log(n_obs);
-  double nmrover2 = 0.5*(n_obs-par->r);
-  double nmr0over2 = 0.5*(n_obs-par->r_0);
+  // double n_obs = par->n;
+  // double log_n = log(n_obs);
+  // double nmrover2 = 0.5*(n_obs-par->r);
+  // double nmr0over2 = 0.5*(n_obs-par->r_0);
+  // double g_0 = par->gamma_0;
+  // double g_1 = par->gamma_1;
+  // double a = par->a;
+  // double log_a = log(a);
+  // double alpha = par->shape_0;
+  // double beta = par->shape_1;
+  // double scale = par->scale;
+  // double saq = scale*a*par->q;
+  // double log_q = log(par->q);
+  // double log_saq = log(saq);
+  // double log_saq_plus_an = logspace_add(log_saq, log_a+log_n);
+  // double Rsq = par->Rsq;
+  // double n1mRsq = n_obs*(1.00-Rsq);
+  // double log_saq_plus_an1mRsq = logspace_add(log_saq, log_a+log_n+log1p(-Rsq));
+  // double max_log = par->max_log_integrand;
+  // double log_const = 0.5*(par->r-par->r_0)*log_saq + alpha*log_a - lbeta(alpha, beta) - max_log;
+  // double power_t = g_0*(0.5*(par->r-par->r_0)+alpha)-1.00;
+  // double power_1mt = g_1*beta-1.00;
+  // double log_t, log_1mt, g_0log_t, g_1log_1mt;
+  // double funny_const;
+  // 
   double g_0 = par->gamma_0;
   double g_1 = par->gamma_1;
-  double a = par->a;
-  double log_a = log(a);
-  double alpha = par->shape_0;
-  double beta = par->shape_1;
-  double scale = par->scale;
-  double saq = scale*a*par->q;
-  double log_q = log(par->q);
-  double log_saq = log(saq);
-  double log_saq_plus_an = logspace_add(log_saq, log_a+log_n);
-  double Rsq = par->Rsq;
-  double n1mRsq = n_obs*(1.00-Rsq);
-  double log_saq_plus_an1mRsq = logspace_add(log_saq, log_a+log_n+log1p(-Rsq));
-  double max_log = par->max_log_integrand;
-  double log_const = 0.5*(par->r-par->r_0)*log_saq + alpha*log_a - lbeta(alpha, beta) - max_log;
-  double power_t = g_0*(0.5*(par->r-par->r_0)+alpha)-1.00;
-  double power_1mt = g_1*beta-1.00;
   double log_t, log_1mt, g_0log_t, g_1log_1mt;
-  double funny_const;
-  
+  double log_wat;
+  double log_a = log(par->a);
+  double log_s = log(par->scale);
+  double log_q = log(par->q);
+  double log_n = log(par->n);
+  double * log_bf_evals = malloc(n*sizeof(double));
+  for(int i=0; i<n; i++) log_bf_evals[i] = t[i];
+  log_bf_integrator.log_eval = 1;
+  (*log_bf_integrand)(log_bf_evals, n, log_bf_integrator.ex);
   for(int i=0; i<n; i++){
     log_t = log(t[i]);
     log_1mt = log1p(-t[i]);
     g_0log_t = g_0*log_t;
     g_1log_1mt = g_1*log_1mt;
-    funny_const = logspace_add(log_a+g_0log_t, g_1log_1mt);
-    t[i] = log_const+
-      funny_const + log_n - logspace_add(funny_const+log_n, log_saq + g_0log_t) +
-      nmrover2*logspace_add(log_n + g_1log_1mt, log_saq_plus_an + g_0log_t)+
-      -nmr0over2*logspace_add(log_n + g_1log_1mt + log1p(-Rsq), log_saq_plus_an1mRsq + g_0log_t)+
-      log(g_0*(1.00-t[i])+g_1*t[i])+
-      -(alpha+beta)*funny_const+
-      power_t*log_t+
-      power_1mt*log_1mt;
+    log_wat = log_s + log_a + g_0log_t - logspace_add(log_a+g_0log_t, g_1log_1mt);
+    t[i] = log_n - logspace_add(log_n, log_q+log_wat) + log_bf_evals[i];
   }
   if(par->log_eval==0){
     for(int i=0; i<n; i++) t[i] = exp(t[i]);
   }
+  free(log_bf_evals); log_bf_evals = NULL;
   return;
 }
 

@@ -12,12 +12,13 @@
 #include"../coef_prior_struct/coef_prior_struct.h"
 #include"../model_struct/model_struct.h"
 #include"../data_store_struct/data_store_struct.h"
+#include "../log_bf_integrator/log_bf_integrator.h"
 
 
 typedef double get_shrinkage_factor_prior_specific_fn_t(struct model_struct * model);
 
 //integrand function
-integr_fn * integrand; //computations done on log scale and then exponentiated in function, return is log-scale
+integr_fn * shrinkage_factor_integrand; //computations done on log scale and then exponentiated in function, return is log-scale
 //function that does the calling
 get_shrinkage_factor_prior_specific_fn_t * get_shrinkage_factor_prior_specific;
 

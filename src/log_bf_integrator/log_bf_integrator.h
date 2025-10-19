@@ -18,7 +18,7 @@
 typedef double get_log_bf_prior_specific_fn_t(struct model_struct * model);
 
 //integrand function
-integr_fn * integrand; //computations done on log scale and then exponentiated in function, return is log-scale
+integr_fn * log_bf_integrand; //computations done on log scale and then exponentiated in function, return is log-scale
 //function that does the calling
 get_log_bf_prior_specific_fn_t * get_log_bf_prior_specific;
 
@@ -112,6 +112,7 @@ struct log_bf_integrator_struct{
   double * work;
 };
 
+extern struct log_bf_integrator_struct log_bf_integrator;
 
 void log_bf_integrator_struct_constructor(struct data_store_struct * data, struct coef_prior_struct * coef_prior);
 

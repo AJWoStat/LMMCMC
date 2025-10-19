@@ -43,7 +43,7 @@ model_t * model_constructor(const int bitrep_length, const int include_coef_esti
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
-  mod->shrinkage_factor = 1.00;
+  mod->shrinkage_factor = log(3.00)/2.00;
   mod->bitrep_length = bitrep_length;
   for(int i=0; i<mod->bitrep_length; i++) mod->bitrep[i]=0;
   model_alloc_coef_estimates_and_vcov(mod, include_coef_estimates, include_coef_vcov);
@@ -152,7 +152,7 @@ void model_bitrep_replacement(model_t * mod, const uint32_t * bitrep, const int 
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
-  mod->shrinkage_factor = 1.00;
+  mod->shrinkage_factor = log(3.00)/2.00;
   mod->hash_key = hash_key_computer(mod->bitrep, mod->bitrep_length);
   return;
 }
@@ -178,7 +178,7 @@ void model_bit_flips(model_t * mod, const int * bits, const int bits_length){
   mod->log_prior = 0.00;
   mod->log_BF0 = 0.00;
   mod->residual_sd = 0.00;
-  mod->shrinkage_factor = 1.00;
+  mod->shrinkage_factor = log(3.00)/2.00;
   mod->hash_key = hash_key_computer(mod->bitrep, mod->bitrep_length);
   return;
 }
