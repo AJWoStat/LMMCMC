@@ -2,7 +2,7 @@
 \alias{lm.mcmc}
 \title{MCMC for Gaussian linear models}
 \description{
-
+MCMC currently does not output regression coefficients and their variances.
 }
 \usage{
 lm.mcmc(
@@ -23,6 +23,7 @@ lm.mcmc(
 \item{mcmc.iterations}{Number of MCMC iterations to return.}
 \item{thin}{Number (plus 1) of iterations to skip between MCMC recording.}
 \item{start.model.indices}{Index numbers for columns of \code{X} that comprise the starting model for the MCMC. }
+\item{max.size.start}{Maximum size of starting model if \code{start.model.indices = NA}.}
 }
 \value{
 A list in the style of BAS. All but \code{mcmc.draws} share a common index.

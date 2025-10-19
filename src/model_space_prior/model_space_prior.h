@@ -1,13 +1,11 @@
 #ifndef MODEL_SPACE_PRIOR_H
 #define MODEL_SPACE_PRIOR_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "Rmath.h"
 #include "../data_store_struct/data_store_struct.h"
-// #include "data_store_struct.h" //remember that data is a global instance of the data_store_struct that is available everywhere
 
 struct model_space_prior_struct{
   char * family;

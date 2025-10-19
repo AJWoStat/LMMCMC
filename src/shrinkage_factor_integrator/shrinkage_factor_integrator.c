@@ -123,12 +123,12 @@ double get_shrinkage_factor(struct model_struct * model){
   shrinkage_factor_integrator.r = (double)(model->rank);
   shrinkage_factor_integrator.q = shrinkage_factor_integrator.eff == 1 ? shrinkage_factor_integrator.r : 1.00;
   //HERE is a problem?
-  shrinkage_factor_integrator.Rsq = 1.00-(1.00 - model->Rsq*data.intercept_only_model_SSE)/data.base_model_SSE;
-  shrinkage_factor_integrator.Rsq = fmin(shrinkage_factor_integrator.Rsq, 1.00);
-  shrinkage_factor_integrator.Rsq = fmax(shrinkage_factor_integrator.Rsq, 0.00);
+  shrinkage_factor_integrator.Rsq = model->Rsq;//1.00-(1.00 - model->Rsq*data.intercept_only_model_SSE)/data.base_model_SSE;
+  // shrinkage_factor_integrator.Rsq = fmin(shrinkage_factor_integrator.Rsq, 1.00);
+  // shrinkage_factor_integrator.Rsq = fmax(shrinkage_factor_integrator.Rsq, 0.00);
   //everything done on log scale and only exponetiated at the end
   double out = (*get_shrinkage_factor_prior_specific)(model);
-  return(exp(out-model->log_BF0));
+  return(exp(out - model->log_BF0));
 }
 
 double get_shrinkage_factor_g_prior(struct model_struct * model){
@@ -142,7 +142,8 @@ void shrinkage_factor_g_prior_integrand(double * t, int n, void * ex)//actually 
   //note use of r and not p
   struct shrinkage_factor_integrator_struct * par = (struct shrinkage_factor_integrator_struct*) ex;
   double scale_times_q_over_n = par->scale * par->q / par->n ;
-  t[0] = -log1p(scale_times_q_over_n)+ 0.5*(par->n - par->r)*log1p(scale_times_q_over_n) +
+  // Rprintf("g-prior log shrinkage %f\n", -log1p(scale_times_q_over_n));
+  t[0] = -log1p(scale_times_q_over_n) + 0.5*(par->n - par->r)*log1p(scale_times_q_over_n) +
     -0.5*(par->n - par->r_0)*log1p(scale_times_q_over_n - par->Rsq) +
     0.5*(par->r - par->r_0)*log(scale_times_q_over_n);
   return;

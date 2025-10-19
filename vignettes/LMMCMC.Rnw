@@ -1,4 +1,7 @@
 \documentclass[12pt]{article}
+
+%\VignetteIndexEntry{LMMCMC}
+
 \usepackage[margin=1in]{geometry}
 
 \usepackage{hyperref}

@@ -1,15 +1,11 @@
 #ifndef DATA_STORE_STRUCT_H
 #define DATA_STORE_STRUCT_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "../int_bit_converters/int_bit_converters.h"
-// #include "int_bit_converters.h"
 #include <R_ext/Lapack.h>
-// #include "lapack.h"
 #include <R_ext/BLAS.h>
-// #include "cblas.h"
 
 struct data_store_struct{
   //column of 1s added as first column of X and 0 always included in base model model indices

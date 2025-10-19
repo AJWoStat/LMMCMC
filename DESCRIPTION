@@ -1,11 +1,11 @@
 Package: LMMCMC
-Version: 1.0.0
-Date: 2025-09-07
+Version: 1.1.0
+Date: 2025-10-18
 Title: MCMC for Gaussian Linear Models
 Authors@R: person("Womack", "Andrew", email="womack.andrew@gmail.com", role=c("aut","cre", "cph"))
-Imports: BAS, leaps
+Imports: methods, leaps
 Description: Package for MCMC for Bayesian posterior inference in Gaussian linear models.
-License: GPL (>= 3)
+License: file LICENSE
 URL: https://github.com/AJWoStat/LMMCMC
 NeedsCompilation: yes
 ByteCompile: yes

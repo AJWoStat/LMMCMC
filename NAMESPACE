@@ -15,5 +15,6 @@ export(inverse_gamma.prior)
 export(beta_prime.prior)
 export(inverse_beta.prior)
 importFrom(leaps, regsubsets)
+importFrom(methods, setClass)
 useDynLib(LMMCMC)
 

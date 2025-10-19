@@ -5,7 +5,7 @@ hash_table_t * hash_table;
 hash_table_t * hash_table_constructor(const int hash_table_length_in, const int linked_list_length_in, const double max_load_factor_in){
   hash_table_t * ht;
   ht = malloc(sizeof(hash_table_t) + hash_table_length_in*linked_list_length_in*sizeof(linked_list_element_t));
-  if(ht==NULL) fprintf(stderr,"hash table allocation failed\n");
+  if(ht==NULL) REprintf("hash table allocation failed\n");
   ht->hash_table_length = hash_table_length_in;
   ht->linked_list_length = linked_list_length_in;
   ht->hash_table_total_length = (ht->hash_table_length)*(ht->linked_list_length);

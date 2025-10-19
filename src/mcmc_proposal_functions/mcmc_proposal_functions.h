@@ -1,7 +1,6 @@
 #ifndef MCMC_PROPOSAL_FUNCTIONS_H
 #define MCMC_PROPOSAL_FUNCTIONS_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "Rmath.h"

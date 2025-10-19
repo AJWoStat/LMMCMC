@@ -1,7 +1,6 @@
 #ifndef MCMC_STRUCT_H
 #define MCMC_STRUCT_H
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "../model_struct/model_struct.h"
