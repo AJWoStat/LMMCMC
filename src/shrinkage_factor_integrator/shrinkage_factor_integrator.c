@@ -369,17 +369,20 @@ double get_shrinkage_factor_scaled_beta(struct model_struct * model){
   shrinkage_factor_integrator.poly_coef[1] = shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[0]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[0]*shrinkage_factor_integrator.C[1];
   shrinkage_factor_integrator.poly_coef[2] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[0]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[0]+shrinkage_factor_integrator.A[1]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[1]*shrinkage_factor_integrator.C[1];
   shrinkage_factor_integrator.poly_coef[3] = shrinkage_factor_integrator.A[2]*shrinkage_factor_integrator.D[1]+shrinkage_factor_integrator.B[2]*shrinkage_factor_integrator.C[1];
-  cubic_root_finder(shrinkage_factor_integrator.poly_coef, shrinkage_factor_integrator.poly_root);
+  if(fabs(shrinkage_factor_integrator.poly_coef[3])>DBL_EPSILON*100){
+    cubic_root_finder(shrinkage_factor_integrator.poly_coef, shrinkage_factor_integrator.poly_root);
+    for(int i=0; i<3; i++){
+      if(shrinkage_factor_integrator.poly_root[i]>0 && 
+         fabs(shrinkage_factor_integrator.poly_root[i+3])<shrinkage_factor_integrator.poly_root_epsilon){
+        shrinkage_factor_integrator.wat0 = shrinkage_factor_integrator.poly_root[i];
+        break;
+      }
+    }
+  }else{
+    shrinkage_factor_integrator.wat0 = (-shrinkage_factor_integrator.poly_coef[1] + sqrt(shrinkage_factor_integrator.poly_coef[1]*shrinkage_factor_integrator.poly_coef[1]-4.00*shrinkage_factor_integrator.poly_coef[2]*shrinkage_factor_integrator.poly_coef[0]))/(2.00*shrinkage_factor_integrator.poly_coef[2]);
+  }
   //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
   //we should probably do a check on INFO here
-  
-  for(int i=0; i<3; i++){
-    if(shrinkage_factor_integrator.poly_root[i]>0 && 
-       fabs(shrinkage_factor_integrator.poly_root[i+3])<shrinkage_factor_integrator.poly_root_epsilon){
-      shrinkage_factor_integrator.wat0 = shrinkage_factor_integrator.poly_root[i];
-      break;
-    }
-  }
 
   double wos = shrinkage_factor_integrator.wat0/shrinkage_factor_integrator.scale;
   // atg0/(atg0+1mtg1) = wos;
