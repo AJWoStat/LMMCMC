@@ -5,7 +5,7 @@ g.prior = function(scale = 1, eff = TRUE){
   if (is.na(eff) || !is.logical(eff) || (eff != TRUE && eff != FALSE)) stop("eff must be TRUE or FALSE.")
   structure(
     list(
-      family = "g",
+      family = "g-prior",
       hyper.parameters = list(scale = scale),
       eff = eff
     ),

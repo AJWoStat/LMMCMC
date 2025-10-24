@@ -12,7 +12,6 @@
 #include "../log_bf_integrator/log_bf_integrator.h"
 #include "../shrinkage_factor_integrator/shrinkage_factor_integrator.h"
 
-
 struct model_fit_workspace_struct{
   //to store in pre-allocated memory and reuse, initialized to have all 0s
   double * XtX;

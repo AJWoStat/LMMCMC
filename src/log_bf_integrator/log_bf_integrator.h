@@ -15,12 +15,10 @@
 #include"../data_store_struct/data_store_struct.h"
 
 
-typedef double get_log_bf_prior_specific_fn_t(struct model_struct * model);
+typedef void log_bf_struct_set_parameter_values_fn_t(struct model_struct * model);
 
 //integrand function
 integr_fn * log_bf_integrand; //computations done on log scale and then exponentiated in function, return is log-scale
-//function that does the calling
-get_log_bf_prior_specific_fn_t * get_log_bf_prior_specific;
 
 struct log_bf_integrator_struct{
   //all bayes factors are relative to base model
@@ -28,6 +26,12 @@ struct log_bf_integrator_struct{
   
   //pointer to self
   struct log_bf_integrator_struct * self_ptr;
+  
+  //integrand function
+  integr_fn * log_bf_integrand; //computations done on log scale and then exponentiated in function, return is log-scale
+  
+  //function to set values of parameters necessary for the integral
+  log_bf_struct_set_parameter_values_fn_t * log_bf_struct_set_parameter_values_fn;
   
   //coefficient prior
   //prior paramaters
@@ -120,10 +124,10 @@ void log_bf_integrator_struct_destructor();
 
 double get_log_bf(struct model_struct * model);
 
-double get_log_bf_g_prior(struct model_struct * model);
-double get_log_bf_gamma(struct model_struct * model);
-double get_log_bf_beta_prime(struct model_struct * model);
-double get_log_bf_scaled_beta(struct model_struct * model);
+void log_bf_struct_set_parameter_values_fn_g_prior(struct model_struct * model);
+void log_bf_struct_set_parameter_values_fn_gamma(struct model_struct * model);
+void log_bf_struct_set_parameter_values_fn_beta_prime(struct model_struct * model);
+void log_bf_struct_set_parameter_values_fn_scaled_beta(struct model_struct * model);
 
 void log_bf_g_prior_integrand(double * t, int n, void * ex);
 void log_bf_gamma_integrand(double * t, int n, void * ex);

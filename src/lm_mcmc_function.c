@@ -83,6 +83,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   // setting log BF computer
   log_bf_integrator_struct_constructor(&data, &coef_prior);
   
+  
   // setting shrinkage factor computer
   shrinkage_factor_integrator_struct_constructor(&data, &coef_prior);
   
@@ -133,9 +134,11 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   //UNPROTECTING THE PROTECTED, the information is all on the C side now.
   UNPROTECT(20);
 
+  
   // do the mcmc
   mcmc_all_draws(&hash_table);
 
+  
   // release the memory that we can
   data_store_destructor();
   model_space_prior_destructor();

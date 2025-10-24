@@ -31,7 +31,7 @@ void coef_prior_struct_constructor(int eff, double scale, double shape[], const 
     coef_prior.shape_0 = shape[0];
     coef_prior.shape_1 = shape[1];
   }else{
-    strcpy(coef_prior.bf_type, "g");
+    strcpy(coef_prior.bf_type, "g-prior");
     coef_prior.shape_0 = 1.00;
     coef_prior.shape_1 = 1.00;
   }

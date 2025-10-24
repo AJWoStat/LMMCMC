@@ -18,17 +18,17 @@ void log_bf_integrator_struct_constructor(struct data_store_struct * data, struc
   
   //integrand and get_log_bf functions
   if(strcmp(log_bf_integrator.bf_type, "gamma")==0 || strcmp(log_bf_integrator.bf_type, "zellner-siow")==0){
-    log_bf_integrand = &log_bf_gamma_integrand; 
-    get_log_bf_prior_specific = &get_log_bf_gamma;
+    log_bf_integrator.log_bf_integrand = &log_bf_gamma_integrand; 
+    log_bf_integrator.log_bf_struct_set_parameter_values_fn = &log_bf_struct_set_parameter_values_fn_gamma;
   }else if(strcmp(log_bf_integrator.bf_type, "beta-prime")==0 || strcmp(log_bf_integrator.bf_type, "hyper-g")==0){
-    log_bf_integrand = &log_bf_beta_prime_integrand; 
-    get_log_bf_prior_specific = &get_log_bf_beta_prime;
+    log_bf_integrator.log_bf_integrand = &log_bf_beta_prime_integrand; 
+    log_bf_integrator.log_bf_struct_set_parameter_values_fn = &log_bf_struct_set_parameter_values_fn_beta_prime;
   }else if(strcmp(log_bf_integrator.bf_type, "scaled-beta")==0 || strcmp(log_bf_integrator.bf_type, "intrinsic")==0){
-    log_bf_integrand = &log_bf_scaled_beta_integrand;
-    get_log_bf_prior_specific = &get_log_bf_scaled_beta;
+    log_bf_integrator.log_bf_integrand = &log_bf_scaled_beta_integrand; 
+    log_bf_integrator.log_bf_struct_set_parameter_values_fn = &log_bf_struct_set_parameter_values_fn_scaled_beta;
   }else{
-    log_bf_integrand = &log_bf_g_prior_integrand;
-    get_log_bf_prior_specific = &get_log_bf_g_prior;
+    log_bf_integrator.log_bf_integrand = &log_bf_g_prior_integrand; 
+    log_bf_integrator.log_bf_struct_set_parameter_values_fn = &log_bf_struct_set_parameter_values_fn_g_prior;
   }
   
   //data
@@ -119,37 +119,46 @@ void log_bf_integrator_struct_destructor(){
 }
 
 double get_log_bf(struct model_struct * model){
+  //common setting for all
   //note use of r and not p for q
   log_bf_integrator.p = (double)(model->size);
   log_bf_integrator.r = (double)(model->rank);
   log_bf_integrator.q = log_bf_integrator.eff == 1 ? log_bf_integrator.r : 1.00;
-  //HERE is a problem?
-  log_bf_integrator.Rsq = model->Rsq;//1.00-(1.00 - model->Rsq*data.intercept_only_model_SSE)/data.base_model_SSE;
-  // log_bf_integrator.Rsq = fmin(log_bf_integrator.Rsq, 1.00);
-  // log_bf_integrator.Rsq = fmax(log_bf_integrator.Rsq, 0.00);
-  double out = (*get_log_bf_prior_specific)(model);
+  
+  log_bf_integrator.Rsq = 1.00-(1.00 - model->Rsq)*data.intercept_only_model_SSE/data.base_model_SSE;
+  //call set parameters function
+  (*log_bf_integrator.log_bf_struct_set_parameter_values_fn)(model);
+  
+  double out;
+  
+  //switch for g-prior bf_type
+  if(strcmp(log_bf_integrator.bf_type, "g-prior")!=0){
+    //do integration here
+    log_bf_integrator.log_eval = 0;
+    Rdqags(*log_bf_integrator.log_bf_integrand, log_bf_integrator.ex,
+           &log_bf_integrator.lower, &log_bf_integrator.upper,
+           &log_bf_integrator.epsabs, &log_bf_integrator.epsrel,
+           &log_bf_integrator.result, &log_bf_integrator.abserr,
+           &log_bf_integrator.neval, &log_bf_integrator.ier,
+           &log_bf_integrator.limit, &log_bf_integrator.lenw,
+           &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
+           //we do no error catching in the integration. It would be shocking if the integral did not work.
+           //we should probably do a check on ier here
+           
+           out = log(log_bf_integrator.result)+log_bf_integrator.max_log_integrand;
+  }else{
+    log_bf_integrator.log_eval = 1;
+    (*log_bf_integrator.log_bf_integrand)(&out, 1, log_bf_integrator.ex);
+  }         
   return(out);
 }
 
-double get_log_bf_g_prior(struct model_struct * model){
-  double out = 0.00;
-  (*log_bf_integrand)(&out, 1, log_bf_integrator.ex);
-  return(out);
-}
-
-void log_bf_g_prior_integrand(double * t, int n, void * ex)//actually unused
-{ 
-  //note use of r and not p
-  struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
-  double scale_times_q_over_n = par->scale * par->q / par->n ;
-  t[0] = 0.5*(par->n - par->r)*log1p(scale_times_q_over_n) +
-    -0.5*(par->n - par->r_0)*log1p(scale_times_q_over_n - par->Rsq) +
-    0.5*(par->r - par->r_0)*log(scale_times_q_over_n);
+void log_bf_struct_set_parameter_values_fn_g_prior(struct model_struct * model){
+  //called but does nothing, just here for completeness and if anything changes in the future for the call to a g-prior
   return;
 }
 
-
-double get_log_bf_gamma(struct model_struct * model){
+void log_bf_struct_set_parameter_values_fn_gamma(struct model_struct * model){
   log_bf_integrator.gamma_0 = 2.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0) + 1.00;//log_bf_integrator.shape_0>0.50 ? 1.00 : 2.00/log_bf_integrator.shape_0;//4.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0);//
   log_bf_integrator.gamma_1 = 1.00;
   //note using ranks instead of sizes
@@ -171,7 +180,7 @@ double get_log_bf_gamma(struct model_struct * model){
   cubic_root_finder(log_bf_integrator.poly_coef, log_bf_integrator.poly_root);
   // we do no error catching in the cubic root solving. It would be shocking if there was an issue.
   // we should probably do a check on INFO here
-
+  
   for(int i=0; i<3; i++){
     if(log_bf_integrator.poly_root[i]>0 && 
        fabs(log_bf_integrator.poly_root[i+3])<log_bf_integrator.poly_root_epsilon){
@@ -184,21 +193,127 @@ double get_log_bf_gamma(struct model_struct * model){
   log_bf_integrator.max_log_integrand = 0.00;
   double initial_val = log_bf_integrator.t_0;
   log_bf_integrator.log_eval = 1;
-  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
+  (*log_bf_integrator.log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
   log_bf_integrator.max_log_integrand = initial_val;
   log_bf_integrator.log_eval = 0;
-  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
-         &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
-         &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
-         &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
-  //we do no error catching in the integration. It would be shocking if the integral did not work.
-  //we should probably do a check on ier here
+  return;
+}
+
+void log_bf_struct_set_parameter_values_fn_beta_prime(struct model_struct * model){
+  log_bf_integrator.gamma_0 = 2.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0) + 1.00;//log_bf_integrator.shape_0>0.50 ? 1.00 : 2.00/log_bf_integrator.shape_0;//4.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0);//
+  log_bf_integrator.gamma_1 = 1.00/log_bf_integrator.shape_1 + 1.00;//log_bf_integrator.shape_1>1.00 ? 1.00 : 2.00/log_bf_integrator.shape_1;//2.00/log_bf_integrator.shape_1;//
+  //note using ranks instead of sizes
+  double rat = (log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0)/(log_bf_integrator.t_0*(1.00-log_bf_integrator.t_0));
+  log_bf_integrator.A[2] = 0.00;
+  log_bf_integrator.A[1] = 0.5*rat*log_bf_integrator.q*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)-log_bf_integrator.Rsq*(log_bf_integrator.n-log_bf_integrator.r_0));
+  log_bf_integrator.A[0] = 0.5*rat*log_bf_integrator.n*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)*(1.00-log_bf_integrator.Rsq));
+  log_bf_integrator.B[2] = log_bf_integrator.q*log_bf_integrator.q;
+  log_bf_integrator.B[1] = log_bf_integrator.q*log_bf_integrator.n*(2.00-log_bf_integrator.Rsq);
+  log_bf_integrator.B[0] = log_bf_integrator.n*log_bf_integrator.n*(1.00-log_bf_integrator.Rsq);
+  double num_add = (log_bf_integrator.gamma_1-log_bf_integrator.gamma_0)/(log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0) - 1.00/log_bf_integrator.t_0 + 1.00/(1.00-log_bf_integrator.t_0);
+  log_bf_integrator.C[1] = -rat*log_bf_integrator.shape_1 + num_add;
+  log_bf_integrator.C[0] = log_bf_integrator.scale*log_bf_integrator.shape_0*rat + log_bf_integrator.scale*num_add;
+  log_bf_integrator.D[1] = 1.00;
+  log_bf_integrator.D[0] = log_bf_integrator.scale;
+  log_bf_integrator.poly_coef[0] = log_bf_integrator.A[0]*log_bf_integrator.D[0]+log_bf_integrator.B[0]*log_bf_integrator.C[0];
+  log_bf_integrator.poly_coef[1] = log_bf_integrator.A[1]*log_bf_integrator.D[0]+log_bf_integrator.B[1]*log_bf_integrator.C[0]+log_bf_integrator.A[0]*log_bf_integrator.D[1]+log_bf_integrator.B[0]*log_bf_integrator.C[1];
+  log_bf_integrator.poly_coef[2] = log_bf_integrator.A[2]*log_bf_integrator.D[0]+log_bf_integrator.B[2]*log_bf_integrator.C[0]+log_bf_integrator.A[1]*log_bf_integrator.D[1]+log_bf_integrator.B[1]*log_bf_integrator.C[1];
+  log_bf_integrator.poly_coef[3] = log_bf_integrator.A[2]*log_bf_integrator.D[1]+log_bf_integrator.B[2]*log_bf_integrator.C[1];
+  cubic_root_finder(log_bf_integrator.poly_coef, log_bf_integrator.poly_root);
+  //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
+  //we should probably do a check on INFO here
   
-  return(log(log_bf_integrator.result)+log_bf_integrator.max_log_integrand);
+  for(int i=0; i<3; i++){
+    if(log_bf_integrator.poly_root[i]>0 && 
+       fabs(log_bf_integrator.poly_root[i+3])<log_bf_integrator.poly_root_epsilon){
+      log_bf_integrator.wat0 = log_bf_integrator.poly_root[i];
+      break;
+    }
+  }
+  log_bf_integrator.a = log_bf_integrator.wat0/log_bf_integrator.scale*exp(logspace_add(log(1.00-log_bf_integrator.t_0)*log_bf_integrator.gamma_1, log(log_bf_integrator.t_0)*log_bf_integrator.gamma_0));
+  log_bf_integrator.max_log_integrand = 0.00;
+  double initial_val = log_bf_integrator.t_0;
+  log_bf_integrator.log_eval = 1;
+  (*log_bf_integrator.log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
+  log_bf_integrator.max_log_integrand = initial_val;
+  log_bf_integrator.log_eval = 0;
+  
+  return;
+}
+
+void log_bf_struct_set_parameter_values_fn_scaled_beta(struct model_struct * model){
+  //note use of r and not p for q
+  log_bf_integrator.p = (double)(model->size);
+  log_bf_integrator.r = (double)(model->rank);
+  log_bf_integrator.q = log_bf_integrator.eff == 1 ? log_bf_integrator.r : 1.00;
+  
+  log_bf_integrator.Rsq = 1.00-(1.00 - model->Rsq)*data.intercept_only_model_SSE/data.base_model_SSE;
+  
+  log_bf_integrator.gamma_0 = 2.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0) + 1.00;//log_bf_integrator.shape_0>0.50 ? 1.00 : 2.00/log_bf_integrator.shape_0;//4.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0);//
+  log_bf_integrator.gamma_1 = 1.00/log_bf_integrator.shape_1 + 1.00;//log_bf_integrator.shape_1>1.00 ? 1.00 : 2.00/log_bf_integrator.shape_1;//2.00/log_bf_integrator.shape_1;//
+  //note using ranks instead of sizes
+  double rat = (log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0)/(log_bf_integrator.t_0*(1.00-log_bf_integrator.t_0));
+  log_bf_integrator.A[2] = 0.5*rat/log_bf_integrator.scale*log_bf_integrator.q*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)-log_bf_integrator.Rsq*(log_bf_integrator.n-log_bf_integrator.r_0));
+  log_bf_integrator.A[0] = 0.5*rat*log_bf_integrator.n*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)*(1.00-log_bf_integrator.Rsq));
+  log_bf_integrator.A[1] = -log_bf_integrator.A[0]/log_bf_integrator.scale + log_bf_integrator.A[2]*log_bf_integrator.scale;
+  log_bf_integrator.B[2] = log_bf_integrator.q*log_bf_integrator.q;
+  log_bf_integrator.B[1] = log_bf_integrator.q*log_bf_integrator.n*(2.00-log_bf_integrator.Rsq);
+  log_bf_integrator.B[0] = log_bf_integrator.n*log_bf_integrator.n*(1.00-log_bf_integrator.Rsq);
+  double num_add = (log_bf_integrator.gamma_1-log_bf_integrator.gamma_0)/(log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0) - 1.00/log_bf_integrator.t_0 + 1.00/(1.00-log_bf_integrator.t_0);
+  log_bf_integrator.C[1] = -rat/log_bf_integrator.scale*(log_bf_integrator.shape_0+log_bf_integrator.shape_1);
+  log_bf_integrator.C[0] = log_bf_integrator.shape_0*rat + num_add;
+  log_bf_integrator.D[1] = 0.00;
+  log_bf_integrator.D[0] = 1.00;
+  log_bf_integrator.poly_coef[0] = log_bf_integrator.A[0]*log_bf_integrator.D[0]+log_bf_integrator.B[0]*log_bf_integrator.C[0];
+  log_bf_integrator.poly_coef[1] = log_bf_integrator.A[1]*log_bf_integrator.D[0]+log_bf_integrator.B[1]*log_bf_integrator.C[0]+log_bf_integrator.A[0]*log_bf_integrator.D[1]+log_bf_integrator.B[0]*log_bf_integrator.C[1];
+  log_bf_integrator.poly_coef[2] = log_bf_integrator.A[2]*log_bf_integrator.D[0]+log_bf_integrator.B[2]*log_bf_integrator.C[0]+log_bf_integrator.A[1]*log_bf_integrator.D[1]+log_bf_integrator.B[1]*log_bf_integrator.C[1];
+  log_bf_integrator.poly_coef[3] = log_bf_integrator.A[2]*log_bf_integrator.D[1]+log_bf_integrator.B[2]*log_bf_integrator.C[1];
+  cubic_root_finder(log_bf_integrator.poly_coef, log_bf_integrator.poly_root);
+  //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
+  //we should probably do a check on INFO here
+  
+  for(int i=0; i<3; i++){
+    if(log_bf_integrator.poly_root[i]>0 && 
+       fabs(log_bf_integrator.poly_root[i+3])<log_bf_integrator.poly_root_epsilon){
+      log_bf_integrator.wat0 = log_bf_integrator.poly_root[i];
+      break;
+    }
+  }
+  
+  double wos = log_bf_integrator.wat0/log_bf_integrator.scale;
+  // atg0/(atg0+1mtg1) = wos;
+  // atg0*(1-wos) = 1mtg1*wos;
+  // a = 1mtg1/tg0*wos/(1-wos);
+  log_bf_integrator.a = wos/(1.00-wos)*exp(logspace_add(log1p(-log_bf_integrator.t_0)*log_bf_integrator.gamma_1, log(log_bf_integrator.t_0)*log_bf_integrator.gamma_0));
+  
+  log_bf_integrator.max_log_integrand = 0.00;
+  double initial_val = log_bf_integrator.t_0;
+  log_bf_integrator.log_eval = 1;
+  (*log_bf_integrator.log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
+  log_bf_integrator.max_log_integrand = initial_val;
+  log_bf_integrator.log_eval = 0;
+  
+  return;
+}
+
+void log_bf_g_prior_integrand(double * t, int n, void * ex)
+{ 
+  //note use of r and not p
+  struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
+  double scale_times_q_over_n = par->scale * par->q / par->n ;
+  double value = 0.5*(par->n - par->r)*log1p(scale_times_q_over_n) +
+    -0.5*(par->n - par->r_0)*log1p(scale_times_q_over_n - par->Rsq) +
+    0.5*(par->r - par->r_0)*log(scale_times_q_over_n);
+  for(int i=0; i<n; i++) t[i] = value;
+  if(par->log_eval==0){
+    for(int i=0; i<n; i++) t[i] = exp(t[i]);
+  }
+  return;
 }
 
 void log_bf_gamma_integrand(double * t, int n, void * ex)
 {
+  //note use of r and not p
   struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
   double n_obs = par->n;
   double log_n = log(n_obs);
@@ -244,57 +359,9 @@ void log_bf_gamma_integrand(double * t, int n, void * ex)
   return;
 }
 
-
-double get_log_bf_beta_prime(struct model_struct * model){
-  log_bf_integrator.gamma_0 = 2.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0) + 1.00;//log_bf_integrator.shape_0>0.50 ? 1.00 : 2.00/log_bf_integrator.shape_0;//4.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0);//
-  log_bf_integrator.gamma_1 = 1.00/log_bf_integrator.shape_1 + 1.00;//log_bf_integrator.shape_1>1.00 ? 1.00 : 2.00/log_bf_integrator.shape_1;//2.00/log_bf_integrator.shape_1;//
-  //note using ranks instead of sizes
-  double rat = (log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0)/(log_bf_integrator.t_0*(1.00-log_bf_integrator.t_0));
-  log_bf_integrator.A[2] = 0.00;
-  log_bf_integrator.A[1] = 0.5*rat*log_bf_integrator.q*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)-log_bf_integrator.Rsq*(log_bf_integrator.n-log_bf_integrator.r_0));
-  log_bf_integrator.A[0] = 0.5*rat*log_bf_integrator.n*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)*(1.00-log_bf_integrator.Rsq));
-  log_bf_integrator.B[2] = log_bf_integrator.q*log_bf_integrator.q;
-  log_bf_integrator.B[1] = log_bf_integrator.q*log_bf_integrator.n*(2.00-log_bf_integrator.Rsq);
-  log_bf_integrator.B[0] = log_bf_integrator.n*log_bf_integrator.n*(1.00-log_bf_integrator.Rsq);
-  double num_add = (log_bf_integrator.gamma_1-log_bf_integrator.gamma_0)/(log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0) - 1.00/log_bf_integrator.t_0 + 1.00/(1.00-log_bf_integrator.t_0);
-  log_bf_integrator.C[1] = -rat*log_bf_integrator.shape_1 + num_add;
-  log_bf_integrator.C[0] = log_bf_integrator.scale*log_bf_integrator.shape_0*rat + log_bf_integrator.scale*num_add;
-  log_bf_integrator.D[1] = 1.00;
-  log_bf_integrator.D[0] = log_bf_integrator.scale;
-  log_bf_integrator.poly_coef[0] = log_bf_integrator.A[0]*log_bf_integrator.D[0]+log_bf_integrator.B[0]*log_bf_integrator.C[0];
-  log_bf_integrator.poly_coef[1] = log_bf_integrator.A[1]*log_bf_integrator.D[0]+log_bf_integrator.B[1]*log_bf_integrator.C[0]+log_bf_integrator.A[0]*log_bf_integrator.D[1]+log_bf_integrator.B[0]*log_bf_integrator.C[1];
-  log_bf_integrator.poly_coef[2] = log_bf_integrator.A[2]*log_bf_integrator.D[0]+log_bf_integrator.B[2]*log_bf_integrator.C[0]+log_bf_integrator.A[1]*log_bf_integrator.D[1]+log_bf_integrator.B[1]*log_bf_integrator.C[1];
-  log_bf_integrator.poly_coef[3] = log_bf_integrator.A[2]*log_bf_integrator.D[1]+log_bf_integrator.B[2]*log_bf_integrator.C[1];
-  cubic_root_finder(log_bf_integrator.poly_coef, log_bf_integrator.poly_root);
-  //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
-  //we should probably do a check on INFO here
-  
-  for(int i=0; i<3; i++){
-    if(log_bf_integrator.poly_root[i]>0 && 
-       fabs(log_bf_integrator.poly_root[i+3])<log_bf_integrator.poly_root_epsilon){
-      log_bf_integrator.wat0 = log_bf_integrator.poly_root[i];
-      break;
-    }
-  }
-  log_bf_integrator.a = log_bf_integrator.wat0/log_bf_integrator.scale*exp(logspace_add(log(1.00-log_bf_integrator.t_0)*log_bf_integrator.gamma_1, log(log_bf_integrator.t_0)*log_bf_integrator.gamma_0));
-  log_bf_integrator.max_log_integrand = 0.00;
-  double initial_val = log_bf_integrator.t_0;
-  log_bf_integrator.log_eval = 1;
-  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
-  log_bf_integrator.max_log_integrand = initial_val;
-  log_bf_integrator.log_eval = 0;
-  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
-         &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
-         &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
-         &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
-         //we do no error catching in the integration. It would be shocking if the integral did not work.
-         //we should probably do a check on ier here
-         
-         return(log(log_bf_integrator.result)+log_bf_integrator.max_log_integrand);
-}
-
 void log_bf_beta_prime_integrand(double * t, int n, void * ex)
 {
+  //note use of r and not p
   struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
   double n_obs = par->n;
   double log_n = log(n_obs);
@@ -336,65 +403,9 @@ void log_bf_beta_prime_integrand(double * t, int n, void * ex)
   return;
 }
 
-double get_log_bf_scaled_beta(struct model_struct * model){
-  double out = 0.00;
-
-  log_bf_integrator.gamma_0 = 2.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0) + 1.00;//log_bf_integrator.shape_0>0.50 ? 1.00 : 2.00/log_bf_integrator.shape_0;//4.00/(2.00*log_bf_integrator.shape_0 + log_bf_integrator.r-log_bf_integrator.r_0);//
-  log_bf_integrator.gamma_1 = 1.00/log_bf_integrator.shape_1 + 1.00;//log_bf_integrator.shape_1>1.00 ? 1.00 : 2.00/log_bf_integrator.shape_1;//2.00/log_bf_integrator.shape_1;//
-  //note using ranks instead of sizes
-  double rat = (log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0)/(log_bf_integrator.t_0*(1.00-log_bf_integrator.t_0));
-  log_bf_integrator.A[2] = 0.5*rat/log_bf_integrator.scale*log_bf_integrator.q*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)-log_bf_integrator.Rsq*(log_bf_integrator.n-log_bf_integrator.r_0));
-  log_bf_integrator.A[0] = 0.5*rat*log_bf_integrator.n*log_bf_integrator.n*((log_bf_integrator.r-log_bf_integrator.r_0)*(1.00-log_bf_integrator.Rsq));
-  log_bf_integrator.A[1] = -log_bf_integrator.A[0]/log_bf_integrator.scale + log_bf_integrator.A[2]*log_bf_integrator.scale;
-  log_bf_integrator.B[2] = log_bf_integrator.q*log_bf_integrator.q;
-  log_bf_integrator.B[1] = log_bf_integrator.q*log_bf_integrator.n*(2.00-log_bf_integrator.Rsq);
-  log_bf_integrator.B[0] = log_bf_integrator.n*log_bf_integrator.n*(1.00-log_bf_integrator.Rsq);
-  double num_add = (log_bf_integrator.gamma_1-log_bf_integrator.gamma_0)/(log_bf_integrator.gamma_0*(1.00-log_bf_integrator.t_0) + log_bf_integrator.gamma_1*log_bf_integrator.t_0) - 1.00/log_bf_integrator.t_0 + 1.00/(1.00-log_bf_integrator.t_0);
-  log_bf_integrator.C[1] = -rat/log_bf_integrator.scale*(log_bf_integrator.shape_0+log_bf_integrator.shape_1);
-  log_bf_integrator.C[0] = log_bf_integrator.shape_0*rat + num_add;
-  log_bf_integrator.D[1] = 0.00;
-  log_bf_integrator.D[0] = 1.00;
-  log_bf_integrator.poly_coef[0] = log_bf_integrator.A[0]*log_bf_integrator.D[0]+log_bf_integrator.B[0]*log_bf_integrator.C[0];
-  log_bf_integrator.poly_coef[1] = log_bf_integrator.A[1]*log_bf_integrator.D[0]+log_bf_integrator.B[1]*log_bf_integrator.C[0]+log_bf_integrator.A[0]*log_bf_integrator.D[1]+log_bf_integrator.B[0]*log_bf_integrator.C[1];
-  log_bf_integrator.poly_coef[2] = log_bf_integrator.A[2]*log_bf_integrator.D[0]+log_bf_integrator.B[2]*log_bf_integrator.C[0]+log_bf_integrator.A[1]*log_bf_integrator.D[1]+log_bf_integrator.B[1]*log_bf_integrator.C[1];
-  log_bf_integrator.poly_coef[3] = log_bf_integrator.A[2]*log_bf_integrator.D[1]+log_bf_integrator.B[2]*log_bf_integrator.C[1];
-  cubic_root_finder(log_bf_integrator.poly_coef, log_bf_integrator.poly_root);
-  //we do no error catching in the cubic root solving. It would be shocking if there was an issue.
-  //we should probably do a check on INFO here
-  
-  for(int i=0; i<3; i++){
-    if(log_bf_integrator.poly_root[i]>0 && 
-       fabs(log_bf_integrator.poly_root[i+3])<log_bf_integrator.poly_root_epsilon){
-      log_bf_integrator.wat0 = log_bf_integrator.poly_root[i];
-      break;
-    }
-  }
-
-  double wos = log_bf_integrator.wat0/log_bf_integrator.scale;
-  // atg0/(atg0+1mtg1) = wos;
-  // atg0*(1-wos) = 1mtg1*wos;
-  // a = 1mtg1/tg0*wos/(1-wos);
-  log_bf_integrator.a = wos/(1.00-wos)*exp(logspace_add(log1p(-log_bf_integrator.t_0)*log_bf_integrator.gamma_1, log(log_bf_integrator.t_0)*log_bf_integrator.gamma_0));
-  
-  log_bf_integrator.max_log_integrand = 0.00;
-  double initial_val = log_bf_integrator.t_0;
-  log_bf_integrator.log_eval = 1;
-  (*log_bf_integrand)(&initial_val, 1, log_bf_integrator.ex);
-  log_bf_integrator.max_log_integrand = initial_val;
-  log_bf_integrator.log_eval = 0;
-  Rdqags(*log_bf_integrand, log_bf_integrator.ex, &log_bf_integrator.lower, &log_bf_integrator.upper,
-         &log_bf_integrator.epsabs, &log_bf_integrator.epsrel, &log_bf_integrator.result, &log_bf_integrator.abserr,
-         &log_bf_integrator.neval, &log_bf_integrator.ier, &log_bf_integrator.limit, &log_bf_integrator.lenw,
-         &log_bf_integrator.last, log_bf_integrator.iwork, log_bf_integrator.work);
-         //we do no error catching in the integration. It would be shocking if the integral did not work.
-         //we should probably do a check on ier here
-         
-         return(log(log_bf_integrator.result)+log_bf_integrator.max_log_integrand);
-  return(out);
-}
-
 void log_bf_scaled_beta_integrand(double * t, int n, void * ex)
 {
+  //note use of r and not p
   struct log_bf_integrator_struct * par = (struct log_bf_integrator_struct*) ex;
   double n_obs = par->n;
   double log_n = log(n_obs);

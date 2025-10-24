@@ -9,7 +9,9 @@ PKG_SRCS_DIRS = data_store_struct \
 	mcmc_struct model_fit_computer \
 	model_space_prior model_struct \
 	cubic_root_finder \
-	coef_prior_struct
+	coef_prior_struct \
+	shrinkage_factor_integrator \
+
 SOURCES = data_store_struct/data_store_struct.c \
 	double_is_equal/double_is_equal.c \
 	get_a_prime/get_a_prime.c \
@@ -24,7 +26,9 @@ SOURCES = data_store_struct/data_store_struct.c \
 	model_space_prior/model_space_prior.c \
 	model_struct/model_struct.c \
 	cubic_root_finder/cubic_root_finder.c \
-	coef_prior_struct/coef_prior_struct.c
+	coef_prior_struct/coef_prior_struct.c \
+	shrinkage_factor_integrator/shrinkage_factor_integrator.c \
+
 OBJECTS = data_store_struct/data_store_struct.o \
 	double_is_equal/double_is_equal.o \
 	get_a_prime/get_a_prime.o \
@@ -39,7 +43,9 @@ OBJECTS = data_store_struct/data_store_struct.o \
 	model_space_prior/model_space_prior.o \
 	model_struct/model_struct.o \
 	cubic_root_finder/cubic_root_finder.o \
-	coef_prior_struct/coef_prior_struct.o
+	coef_prior_struct/coef_prior_struct.o \
+	shrinkage_factor_integrator/shrinkage_factor_integrator.o \
+	
 PKG_LIBS =  $(LAPACK_LIBS) $(BLAS_LIBS) $(addprefix -L, $(PKG_SRCS_DIRS))
 PKG_CPPFLAGS = $(addprefix -I, $(PKG_SRCS_DIRS))
 
