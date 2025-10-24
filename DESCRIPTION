@@ -1,6 +1,6 @@
 Package: LMMCMC
-Version: 1.1.0
-Date: 2025-10-18
+Version: 1.1.5
+Date: 2025-10-23
 Title: MCMC for Gaussian Linear Models
 Authors@R: person("Womack", "Andrew", email="womack.andrew@gmail.com", role=c("aut","cre", "cph"))
 Imports: methods, leaps
