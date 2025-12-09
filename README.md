@@ -3,12 +3,11 @@ MCMC for Gaussian Linear Models
 
 Install needs to be done using R CMD build (to build the vignette) and R CMD install (of the tarball). 
 
-Download the main branch to a /some path/LMMCMC. 
+Download the main branch to a /some path/LMMCMC
 
 Using terminal, do
 
-cd /some path/
-
+cd /some path/ \n
 R CMD build LMMCMC
 
 R CMD install LMMCMC_1.1.5.tar.gz
