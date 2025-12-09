@@ -7,7 +7,8 @@ Download the main branch to a /some path/LMMCMC
 
 Using terminal, do
 
-cd /some path/ \n
+cd /some path/
+
 R CMD build LMMCMC
 
 R CMD install LMMCMC_1.1.5.tar.gz
