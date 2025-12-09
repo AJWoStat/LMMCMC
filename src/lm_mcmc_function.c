@@ -85,7 +85,7 @@ SEXP lm_mcmc_function(SEXP X_in, SEXP y_in, SEXP weights_in, SEXP base_model_ind
   
   
   // setting shrinkage factor computer
-  shrinkage_factor_integrator_struct_constructor(&data, &coef_prior);
+  shrinkage_factor_integrator_struct_constructor();
   
   //setting model fit
   model_fit_workspace_constructor();
